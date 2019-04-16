@@ -51,7 +51,7 @@ class EventStoreWorker extends Command
     {
         $eventStore = new EventStore();
         $connection = $eventStore->connect(config('services.eventstore.url'));
-        $streams = config('services.eventstore.streams');
+        $streams = config('services.eventstore.subscription_streams');
 
         $connection->subscribe(function () use ($eventStore, $streams) {
             foreach ($streams as $stream) {
@@ -63,7 +63,7 @@ class EventStoreWorker extends Command
     private function processStream($eventStore, string $stream)
     {
         $eventStore
-            ->persistentSubscription($stream, config('services.eventstore.stream_group'))
+            ->persistentSubscription($stream, config('services.eventstore.subscription'))
             ->subscribe(function (AcknowledgeableEventRecord $event) {
                 $url = config('services.eventstore.web_url')."/streams/{$event->getStreamId()}/{$event->getNumber()}";
                 $this->info($url);

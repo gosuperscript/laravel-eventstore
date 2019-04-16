@@ -14,30 +14,36 @@ abstract class SendEvent implements ShouldBeSent
     public function __construct(array $payload = [], array $metadata = [], $request = null)
     {
         if (!$this->name) {
-            throw new \Exception(sprintf('No name defined for class %s', get_class($this)));
+            throw new \Exception('Name not defined');
         }
 
-        $this->stream = $this->getStream();
-
-        if (!$this->stream) {
-            throw new \Exception(sprintf('Stream not defined for class %s', get_class($this)));
-        }
-
-        if ($request && $request->has('trackingParams')) {
-            $metadata['trackingParams'] = $request->trackingParams;
-        }
-
-        $this->payload = $this->serialize($payload);
-        $this->metadata = $this->serialize($metadata);
+        $this->setStream();
+        $this->setMetadata($metadata);
+        $this->setPayload($payload);
+        
         $this->request = $request;
     }
 
-    public function getStream()
+    protected function setMetadata($metadata)
     {
-        return new $this->streamClass();
+        $this->metadata = $this->serialize($metadata);
     }
 
-    public function serialize(array $data = [])
+    protected function setPayload($payload)
+    {
+        $this->payload = $this->serialize($payload);
+    }
+
+    protected function setStream()
+    {
+        if (!$this->streamClass || !class_exists($this->streamClass)) {
+            throw new \Exception('Stream class not defined');
+        }
+
+        $this->stream = $this->streamClass();
+    }
+
+    protected function serialize(array $data = [])
     {
         $return = [];
 

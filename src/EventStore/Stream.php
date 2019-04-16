@@ -10,13 +10,13 @@ abstract class Stream
     public function __construct()
     {
         if (!$this->key) {
-            throw new \Exception(sprintf('No key defined for class %s', get_class($this)));
+            throw new \Exception('Stream key not defined');
         }
 
-        $streamName = config('streams.'.$this->key);
+        $streamName = config('services.eventstore.streams.'.$this->key);
 
         if (!$streamName) {
-            throw new \Exception(sprintf('Stream not defined for class %s', get_class($this)));
+            throw new \Exception('Stream name not defined');
         }
 
         $this->name = $streamName;

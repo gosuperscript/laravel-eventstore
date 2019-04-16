@@ -1,0 +1,18 @@
+<?php
+
+return [
+    'eventstore' => [
+        'url' => env('EVENTSTORE_URL'),
+        'web_url' => env('EVENTSTORE_WEB_URL'),
+        'streams' => [
+            'accounts' => env('EVENTSTORE_STREAMS_ACCOUNTS'),
+            'billing' => env('EVENTSTORE_STREAMS_BILLING'),
+            'business_exceptions' => env('EVENTSTORE_STREAMS_BUSINESS_EXCEPTIONS'),
+            'chargebee' => env('EVENTSTORE_STREAMS_CHARGEBEE'),
+            'policies' => env('EVENTSTORE_STREAMS_POLICIES'),
+            'quotes' => env('EVENTSTORE_STREAMS_QUOTES'),
+        ],
+        'subscription' => env('EVENTSTORE_SUBSCRIPTION'),
+        'subscription_streams' => explode(',', env('EVENTSTORE_SUBSCRIPTION_STREAMS')),
+    ],
+];
