@@ -17,11 +17,4 @@ class ServiceProvider extends Provider
             ]);   
         }
     }
-
-    public function register()
-    {
-        $this->app->singleton(LoopInterface::class, function () {
-            return EventLoop::getLoop();
-        }); 
-    }
 }

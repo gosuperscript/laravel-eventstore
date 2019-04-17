@@ -6,7 +6,7 @@ namespace Mannum\EventStore\Console\Commands;
 
 use Illuminate\Console\Command;
 
-use React\EventLoop\LoopInterface;
+use EventLoop\EventLoop;
 use Rxnet\EventStore\EventStore;
 use Rxnet\EventStore\Record\AcknowledgeableEventRecord;
 
@@ -22,11 +22,11 @@ class EventStoreWorker extends Command
 
     protected $eventstore;
 
-    public function __construct(LoopInterface $loop)
+    public function __construct()
     {
         parent::__construct();
 
-        $this->loop = $loop;
+        $this->loop = EventLoop::getLoop();
     }
 
     public function handle()
