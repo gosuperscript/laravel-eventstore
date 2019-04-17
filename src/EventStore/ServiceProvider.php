@@ -20,10 +20,8 @@ class ServiceProvider extends Provider
 
     public function register()
     {
-        if ($this->app->runningInConsole()) {
-            $this->app->singleton(LoopInterface::class, function () {
-                return EventLoop::getLoop();
-            }); 
-        }
+        $this->app->singleton(LoopInterface::class, function () {
+            return EventLoop::getLoop();
+        }); 
     }
 }

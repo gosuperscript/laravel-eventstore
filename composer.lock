@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f7d8347f78eaf906c9f6e8946cdf5c04",
+    "content-hash": "6d8fb94c6b13bc07aed0febb22850f0e",
     "packages": [
         {
             "name": "TrafficCophp/ByteBuffer",
