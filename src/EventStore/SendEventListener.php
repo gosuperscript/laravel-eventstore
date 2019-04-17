@@ -13,7 +13,7 @@ class SendEventListener
 
     public function handle($event)
     {
-        $response = $this->client->post("/streams/{$event->stream->name}", [
+        $response = $this->client->post("/streams/{$event->getStream()}", [
             'body' => json_encode([[
                 'eventId' => Uuid::uuid4(),
                 'eventType' => $event->name,

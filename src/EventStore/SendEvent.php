@@ -5,30 +5,19 @@ namespace Mannum\EventStore;
 abstract class SendEvent implements ShouldBeSent
 {
     public $name;
-    public $payload;
     public $stream;
+    
+    public $payload;
     public $metadata;
 
-    protected $streamClass;
-
-    public function __construct(array $payload = [], array $metadata = [], $request = null)
+    public function __construct(array $payload = [], array $metadata = [])
     {
         if (!$this->name) {
             throw new \Exception('Name not defined');
         }
 
-        $this->setStream();
         $this->setMetadata($metadata);
         $this->setPayload($payload);
-        
-        $this->request = $request;
-
-        $this->init();
-    }
-
-    protected function setMetadata($metadata)
-    {
-        $this->metadata = $this->serialize($metadata);
     }
 
     protected function setPayload($payload)
@@ -36,13 +25,9 @@ abstract class SendEvent implements ShouldBeSent
         $this->payload = $this->serialize($payload);
     }
 
-    protected function setStream()
+    protected function setMetadata($metadata)
     {
-        if (!$this->streamClass || !class_exists($this->streamClass)) {
-            throw new \Exception('Stream class not defined');
-        }
-
-        $this->stream = new $this->streamClass();
+        $this->metadata = $this->serialize($metadata);
     }
 
     protected function serialize(array $data = [])
@@ -60,8 +45,8 @@ abstract class SendEvent implements ShouldBeSent
         return $return;
     }
 
-    protected function init()
+    public function getStream()
     {
-
+        return config("services.eventstore.streams.{$this->stream}");
     }
 }
