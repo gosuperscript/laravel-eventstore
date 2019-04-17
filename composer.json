@@ -14,5 +14,12 @@
         "classmap": [
             "src/"
         ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Mannum\\EventStore\\ServiceProvider"
+            ]
+        }
     }
 }

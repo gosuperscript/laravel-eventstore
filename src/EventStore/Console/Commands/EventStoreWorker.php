@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Mannum\Console\Commands;
+namespace Mannum\EventStore\Console\Commands;
 
 use Illuminate\Console\Command;
 
