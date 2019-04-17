@@ -14,11 +14,16 @@ class ServiceProvider extends Provider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 EventStoreWorker::class,
-            ]);
+            ]);   
+        }
+    }
 
+    public function register()
+    {
+        if ($this->app->runningInConsole()) {
             $this->app->singleton(LoopInterface::class, function () {
                 return EventLoop::getLoop();
-            });    
+            }); 
         }
     }
 }
