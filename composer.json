@@ -9,5 +9,10 @@
         "laravel/framework": "5.7.*",
         "rxnet/eventstore-client": "^3.0.2",
         "phpunit/phpunit": "^7.0"
+    },
+    "autoload": {
+        "classmap": [
+            "src/"
+        ]
     }
 }
