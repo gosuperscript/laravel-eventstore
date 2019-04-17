@@ -2,6 +2,8 @@
 
 namespace Mannum\EventStore;
 
+use EventLoop\EventLoop;
+
 use Illuminate\Support\ServiceProvider as Provider;
 use Mannum\EventStore\Console\Commands\EventStoreWorker;
 
@@ -13,6 +15,10 @@ class ServiceProvider extends Provider
             $this->commands([
                 EventStoreWorker::class,
             ]);
+
+            $this->app->singleton(LoopInterface::class, function () {
+                return EventLoop::getLoop();
+            });    
         }
     }
 }
