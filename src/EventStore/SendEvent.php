@@ -22,6 +22,8 @@ abstract class SendEvent implements ShouldBeSent
         $this->setPayload($payload);
         
         $this->request = $request;
+
+        $this->init();
     }
 
     protected function setMetadata($metadata)
@@ -40,7 +42,7 @@ abstract class SendEvent implements ShouldBeSent
             throw new \Exception('Stream class not defined');
         }
 
-        $this->stream = $this->streamClass();
+        $this->stream = new $this->streamClass();
     }
 
     protected function serialize(array $data = [])
@@ -56,5 +58,10 @@ abstract class SendEvent implements ShouldBeSent
         }
 
         return $return;
+    }
+
+    protected function init()
+    {
+
     }
 }
