@@ -8,7 +8,7 @@
         "ramsey/uuid": "^3.8",
         "laravel/framework": ">=5.7.0",
         "rxnet/eventstore-client": "^3.0.2",
-        "phpunit/phpunit": "^7.0"
+        "phpunit/phpunit": ">=7.0"
     },
     "autoload": {
         "classmap": [
