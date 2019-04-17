@@ -21,7 +21,6 @@ class SendEventListener
                 'metadata' => array_merge([
                     'name' => config('app.name'),
                     'env' => config('app.env'),
-                    'requestId' => $event->request ? $event->request->header('X-Request-ID') : null,
                     'heroku' => collect($_ENV)->filter(function ($value, $key) {
                         return strpos($key, 'HEROKU_') === 0;
                     })->toArray(),
