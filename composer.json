@@ -1,25 +1,57 @@
 {
     "name": "mannum/laravel-eventstore",
-    "description": "All things regarding integrating Event Store into Laravel",
+    "description": "All things regarding integrating Greg Young's Event Store into Laravel",
+    "keywords": [
+        "mannum",
+        "laravel-event-store"
+    ],
+    "homepage": "https://github.com/mannum/laravel-event-store",
+    "license": "MIT",
     "type": "library",
+    "authors": [
+        {
+            "name": "Pawel Trauth",
+            "email": "pawel.trauth@digitalrisks.co.uk",
+            "role": "Developer"
+        }
+    ],
     "require": {
-        "php": ">=7.1.0",
-        "guzzlehttp/guzzle": "~6.0",
+        "php": "^7.1",
+        "guzzlehttp/guzzle": "^6.3",
+        "illuminate/support": "5.8.*",
         "ramsey/uuid": "^3.8",
-        "laravel/framework": ">=5.7.0",
-        "rxnet/eventstore-client": "^3.0.2",
-        "phpunit/phpunit": ">=7.0"
+        "rxnet/eventstore-client": "^3.0.2"
+    },
+    "require-dev": {
+        "orchestra/testbench": "3.8.*",
+        "phpunit/phpunit": "^8.0"
     },
     "autoload": {
-        "classmap": [
-            "src/"
-        ]
+        "psr-4": {
+            "Mannum\\LaravelEventStore\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Mannum\\LaravelEventStore\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Mannum\\EventStore\\ServiceProvider"
-            ]
+                "Mannum\\LaravelEventStore\\LaravelEventStoreServiceProvider"
+            ],
+            "aliases": {
+                "LaravelEventStore": "Mannum\\LaravelEventStore\\LaravelEventStoreFacade"
+            }
         }
     }
 }
