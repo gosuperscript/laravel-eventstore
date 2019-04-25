@@ -1,7 +1,7 @@
 # Laravel EventStore
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/mannum/laravel-event-store.svg?style=flat-square)](https://packagist.org/packages/mannum/laravel-event-store)
-[![Build Status](https://img.shields.io/travis/mannum/laravel-event-store/master.svg?style=flat-square)](https://travis-ci.org/mannum/laravel-event-store)
+[![Build Status](https://img.shields.io/travis/com/mannum/laravel-event-store/master.svg?style=flat-square)](https://travis-ci.com/mannum/laravel-event-store)
 [![Quality Score](https://img.shields.io/scrutinizer/g/mannum/laravel-event-store.svg?style=flat-square)](https://scrutinizer-ci.com/g/mannum/laravel-event-store)
 [![Total Downloads](https://img.shields.io/packagist/dt/mannum/laravel-event-store.svg?style=flat-square)](https://packagist.org/packages/mannum/laravel-event-store)
 
