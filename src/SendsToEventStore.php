@@ -2,14 +2,15 @@
 
 namespace Mannum\LaravelEventStore;
 
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidInterface;
 use ReflectionClass;
+use Ramsey\Uuid\Uuid;
 use ReflectionProperty;
+use Ramsey\Uuid\UuidInterface;
 
 trait SendsToEventStore
 {
-    public function getData(): array {
+    public function getData(): array
+    {
         $payload = [];
 
         foreach ((new ReflectionClass($this))->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
@@ -19,7 +20,8 @@ trait SendsToEventStore
         return $payload;
     }
 
-    public function getMetadata(): array {
+    public function getMetadata(): array
+    {
         return collect((new ReflectionClass($this))->getMethods())
             ->filter(function ($method) {
                 return strpos($method->getDocComment(), '@metadata') !== false;
@@ -32,7 +34,7 @@ trait SendsToEventStore
 
     public function getEventType(): string
     {
-        return str_replace(config('eventstore.namespace') . '\\', '', get_class($this));
+        return str_replace(config('eventstore.namespace').'\\', '', get_class($this));
     }
 
     public function getEventId(): UuidInterface

@@ -3,9 +3,9 @@
 namespace Mannum\LaravelEventStore\Tests\Traits;
 
 use Mannum\LaravelEventStore\Client;
-use Mannum\LaravelEventStore\Tests\Constraint\EventNotOnEventStoreConstraint;
 use Mannum\LaravelEventStore\Tests\Constraint\EventOnEventStoreConstraint;
 use Mannum\LaravelEventStore\Tests\Constraint\EventsOnEventStoreConstraint;
+use Mannum\LaravelEventStore\Tests\Constraint\EventNotOnEventStoreConstraint;
 
 trait InteractsWithEventStore
 {

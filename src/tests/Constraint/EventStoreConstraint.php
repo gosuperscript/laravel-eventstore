@@ -29,9 +29,9 @@ abstract class EventStoreConstraint extends Constraint
 
         foreach ($response->entries as $esEvent) {
             if ($compareEvent->eventType == $esEvent->eventType &&
-                (!empty($compareEvent->streamName) ? $compareEvent->streamName == $esEvent->streamId : true) &&
-                (!empty($compareEvent->data) ? array_intersect_key(json_decode($esEvent->data, true), $compareEvent->data) == $compareEvent->data : true) &&
-                (!empty($compareEvent->metaData) ? array_intersect_key(json_decode($esEvent->metaData, true), $compareEvent->metaData) == $compareEvent->metaData : true)
+                (! empty($compareEvent->streamName) ? $compareEvent->streamName == $esEvent->streamId : true) &&
+                (! empty($compareEvent->data) ? array_intersect_key(json_decode($esEvent->data, true), $compareEvent->data) == $compareEvent->data : true) &&
+                (! empty($compareEvent->metaData) ? array_intersect_key(json_decode($esEvent->metaData, true), $compareEvent->metaData) == $compareEvent->metaData : true)
             ) {
                 return true;
             }

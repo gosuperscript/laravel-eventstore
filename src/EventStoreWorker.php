@@ -2,9 +2,8 @@
 
 namespace Mannum\LaravelEventStore;
 
-use Illuminate\Console\Command;
-
 use EventLoop\EventLoop;
+use Illuminate\Console\Command;
 use Rxnet\EventStore\EventStore;
 use Rxnet\EventStore\Record\AcknowledgeableEventRecord;
 
@@ -90,7 +89,7 @@ class EventStoreWorker extends Command
     protected function dispatch(AcknowledgeableEventRecord $event)
     {
         $type = $event->getType();
-        $class = config('eventstore.namespace') . '\\' . $type;
+        $class = config('eventstore.namespace').'\\'.$type;
 
         class_exists($class) ? event(new $class($event)) : event($type, $event);
     }

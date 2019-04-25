@@ -6,5 +6,5 @@ return [
     'streams' => [],
     'group' => '',
     'event_to_class' => '',
-    'namespace' => 'App\Events'
+    'namespace' => 'App\Events',
 ];
