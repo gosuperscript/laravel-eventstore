@@ -1,8 +1,8 @@
 <?php
 
-namespace Mannum\EventStore\Tests\Constraint;
+namespace Mannum\LaravelEventStore\Tests\Constraint;
 
-use Mannum\EventStore\Client;
+use Mannum\LaravelEventStore\Client;
 use GuzzleHttp\Exception\ClientException;
 use PHPUnit\Framework\Constraint\Constraint;
 

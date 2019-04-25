@@ -1,8 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Mannum\EventStore\Console\Commands;
+namespace Mannum\LaravelEventStore;
 
 use Illuminate\Console\Command;
 
@@ -50,8 +48,8 @@ class EventStoreWorker extends Command
     public function processAllStreams()
     {
         $eventStore = new EventStore();
-        $connection = $eventStore->connect(config('services.eventstore.url'));
-        $streams = config('services.eventstore.subscription_streams');
+        $connection = $eventStore->connect(config('eventstore.tcp_url'));
+        $streams = config('eventstore.streams');
 
         $connection->subscribe(function () use ($eventStore, $streams) {
             foreach ($streams as $stream) {
@@ -63,13 +61,13 @@ class EventStoreWorker extends Command
     private function processStream($eventStore, string $stream)
     {
         $eventStore
-            ->persistentSubscription($stream, config('services.eventstore.subscription'))
+            ->persistentSubscription($stream, config('eventstore.group'))
             ->subscribe(function (AcknowledgeableEventRecord $event) {
-                $url = config('services.eventstore.web_url')."/streams/{$event->getStreamId()}/{$event->getNumber()}";
+                $url = config('eventstore.http_url')."/streams/{$event->getStreamId()}/{$event->getNumber()}";
                 $this->info($url);
 
                 try {
-                    event($event->getType(), $event);
+                    $this->dispatch($event);
                     $event->ack();
                 } catch (\Exception $e) {
                     dump([
@@ -87,5 +85,13 @@ class EventStoreWorker extends Command
                     report($e);
                 }
             }, 'report');
+    }
+
+    protected function dispatch(AcknowledgeableEventRecord $event)
+    {
+        $type = $event->getType();
+        $class = config('eventstore.namespace') . '\\' . $type;
+
+        class_exists($class) ? event(new $class($event)) : event($type, $event);
     }
 }

@@ -18,7 +18,7 @@
     "require": {
         "php": "^7.1",
         "guzzlehttp/guzzle": "^6.3",
-        "illuminate/support": "5.8.*",
+        "illuminate/support": "5.7.* || 5.8.*",
         "ramsey/uuid": "^3.8",
         "rxnet/eventstore-client": "^3.0.2"
     },
@@ -47,11 +47,8 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Mannum\\LaravelEventStore\\LaravelEventStoreServiceProvider"
-            ],
-            "aliases": {
-                "LaravelEventStore": "Mannum\\LaravelEventStore\\LaravelEventStoreFacade"
-            }
+                "Mannum\\LaravelEventStore\\ServiceProvider"
+            ]
         }
     }
 }

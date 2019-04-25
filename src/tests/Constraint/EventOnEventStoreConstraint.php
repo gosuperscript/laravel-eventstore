@@ -1,10 +1,10 @@
 <?php
 
-namespace Mannum\EventStore\Tests\Constraint;
+namespace Mannum\LaravelEventStore\Tests\Constraint;
 
 use PHPUnit\Framework\ExpectationFailedException;
 
-class EventNotOnEventStoreConstraint extends EventStoreConstraint
+class EventOnEventStoreConstraint extends EventStoreConstraint
 {
     public function evaluate($compare, $description = '', $returnResult = false)
     {
@@ -19,10 +19,10 @@ class EventNotOnEventStoreConstraint extends EventStoreConstraint
             return $exists;
         }
 
-        if ($exists) {
+        if (!$exists) {
             throw new ExpectationFailedException(
                 sprintf(
-                    'Event %s%s found on Event Store%s',
+                    'Event %s%s not found on EventStore%s',
                     $compareEvent->eventType,
                     !empty($compareEvent->data) ? sprintf(' with data %s', json_encode($compareEvent->data)) : '',
                     !empty($compareEvent->metaData) ? sprintf(' with metadata %s', json_encode($compareEvent->metaData)) : '',
@@ -41,6 +41,6 @@ class EventNotOnEventStoreConstraint extends EventStoreConstraint
      */
     public function toString(): string
     {
-        return 'Event was not raised on Event Store';
+        return 'Event was raised on EventStore';
     }
 }

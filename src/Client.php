@@ -1,13 +1,12 @@
 <?php
 
-namespace Mannum\EventStore;
+namespace Mannum\LaravelEventStore;
 
-//@todo - cater for event store being down - PT
 class Client extends \GuzzleHttp\Client
 {
     public function __construct(array $config = [])
     {
-        $url = config('services.eventstore.web_url');
+        $url = config('eventstore.http_url');
 
         $config = array_merge([
             'base_uri' => $url,
