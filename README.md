@@ -165,6 +165,20 @@ class QuoteStartedTest extends TestCase
 
 ## Configuration
 
+The defaults are set in `config/eventstore.php`. Copy this file to your own config directory to modify the values:
+
+    php artisan vendor:publish --provider="Mannum\LaravelEventStore\ServiceProvider"
+
+``` php
+return [
+    'tcp_url' => 'tls://admin:changeit@localhost:1113',
+    'http_url' => 'http://admin:changeit@localhost:2113',
+    'streams' => ['quotes', 'accounts'],
+    'group' => 'quote-email-senderer',
+    'namespace' => 'App\Events'
+];
+```
+
 ## Testing
 
 ``` bash
