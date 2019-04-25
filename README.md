@@ -66,6 +66,8 @@ Or you can define your own methods to collect metadata. Any method with the `@me
 ``` php
 class QuoteStarted implements Mannum\LaravelEventStore\ShouldBeEventStored
 {
+    use Mannum\LaravelEventStore\Tests\Traits\AddsLaravelMetadata;
+    
     /** @metadata */
     public function collectIpMetadata()
     {
@@ -81,7 +83,19 @@ class QuoteStarted implements Mannum\LaravelEventStore\ShouldBeEventStored
 If you would like to test that your events are being fired correctly, you can use the Laravel `Event::mock` method, or the package comes with helpers that interact with an eventstore to confirm they have been stored correctly. 
 
 ``` php
+class QuoteStartedTest extends TestCase
+{
+    use Mannum\LaravelEventStore\Tests\Traits\InteractsWithEventStore;
 
+    public function test_it_creates_an_event_when_a_quote_is_started()
+    {
+        // Act.
+        $this->json('POST', '/api/quote', ['email' => 'quote@start.com']);
+
+        // Assert.
+        $this->assertEventStoreEventRaised('quote_started', 'quotes', ['email' => 'quote@start.com']);
+    }
+}
 ```
 
 ## Usage - Receiving Events
@@ -146,6 +160,7 @@ class QuoteStartedTest extends TestCase
         // Assert.
         Mail::assertSentTo('start@quotes.com');
     }
+}
 ```
 
 ## Configuration
