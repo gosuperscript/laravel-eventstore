@@ -1,9 +1,9 @@
 # Laravel EventStore
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/mannum/laravel-event-store.svg?style=flat-square)](https://packagist.org/packages/mannum/laravel-event-store)
-[![Build Status](https://img.shields.io/travis/com/mannum/laravel-event-store/master.svg?style=flat-square)](https://travis-ci.com/mannum/laravel-event-store)
-[![Quality Score](https://img.shields.io/scrutinizer/g/mannum/laravel-event-store.svg?style=flat-square)](https://scrutinizer-ci.com/g/mannum/laravel-event-store)
-[![Total Downloads](https://img.shields.io/packagist/dt/mannum/laravel-event-store.svg?style=flat-square)](https://packagist.org/packages/mannum/laravel-event-store)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/mannum/laravel-eventstore.svg?style=flat-square)](https://packagist.org/packages/mannum/laravel-eventstore)
+[![Build Status](https://img.shields.io/travis/com/mannum/laravel-eventstore/master.svg?style=flat-square)](https://travis-ci.com/mannum/laravel-eventstore)
+[![Quality Score](https://img.shields.io/scrutinizer/g/mannum/laravel-eventstore.svg?style=flat-square)](https://scrutinizer-ci.com/g/mannum/laravel-eventstore)
+[![Total Downloads](https://img.shields.io/packagist/dt/mannum/laravel-eventstore.svg?style=flat-square)](https://packagist.org/packages/mannum/laravel-eventstore)
 
 This package integrates Greg Young's `eventstore` into Laravel's event system. By simply implementing `ShouldBeEventStored` on your events, they will be sent to eventstore. In the same fashion you can also setup listeners that can respond to events that are received from the eventstore.
 
