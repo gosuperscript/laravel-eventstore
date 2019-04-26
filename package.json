@@ -1,0 +1,16 @@
+{
+    "name": "@mannum/laravel-eventstore",
+    "private": true,
+    "release": {
+        "verifyConditions": [
+            "@semantic-release/github"
+        ],
+        "getLastRelease": "@semantic-release/git",
+        "publish": "@semantic-release/github"
+    },
+    "config": {
+        "commitizen": {
+            "path": "cz-conventional-changelog"
+        }
+    }
+}
