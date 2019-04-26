@@ -8,6 +8,8 @@ use PHPUnit\Framework\Constraint\Constraint;
 
 abstract class EventStoreConstraint extends Constraint
 {
+    protected $client;
+
     public function __construct(Client $client)
     {
         $this->client = $client;
