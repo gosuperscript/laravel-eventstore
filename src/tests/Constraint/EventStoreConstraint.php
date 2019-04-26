@@ -12,7 +12,9 @@ abstract class EventStoreConstraint extends Constraint
     {
         $this->client = $client;
 
-        parent::__construct();
+        if (version_compare(Version::id(), '8.0.0', '<')) {
+            parent::__construct();
+        }
     }
 
     protected function checkStream($compareEvent)

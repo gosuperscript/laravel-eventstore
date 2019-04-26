@@ -18,3 +18,6 @@ script:
 
 after_script:
   - php vendor/bin/ocular code-coverage:upload --format=php-clover coverage.clover
+
+after_success:
+  - npx semantic-release
