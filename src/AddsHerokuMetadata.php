@@ -1,6 +1,6 @@
 <?php
 
-namespace Mannum\LaravelEventStore\Tests\Traits;
+namespace Mannum\LaravelEventStore;
 
 trait AddsHerokuMetadata
 {
