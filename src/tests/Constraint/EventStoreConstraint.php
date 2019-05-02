@@ -5,6 +5,7 @@ namespace Mannum\LaravelEventStore\Tests\Constraint;
 use Mannum\LaravelEventStore\Client;
 use GuzzleHttp\Exception\ClientException;
 use PHPUnit\Framework\Constraint\Constraint;
+use PHPUnit\Runner\Version;
 
 abstract class EventStoreConstraint extends Constraint
 {
