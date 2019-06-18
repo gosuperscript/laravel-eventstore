@@ -2,7 +2,6 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/digitalrisks/laravel-eventstore.svg?style=flat-square)](https://packagist.org/packages/digitalrisks/laravel-eventstore)
 [![Build Status](https://img.shields.io/travis/com/digitalrisks/laravel-eventstore/master.svg?style=flat-square)](https://travis-ci.com/digitalrisks/laravel-eventstore)
-[![Quality Score](https://img.shields.io/scrutinizer/g/digitalrisks/laravel-eventstore.svg?style=flat-square)](https://scrutinizer-ci.com/g/digitalrisks/laravel-eventstore)
 [![Total Downloads](https://img.shields.io/packagist/dt/digitalrisks/laravel-eventstore.svg?style=flat-square)](https://packagist.org/packages/digitalrisks/laravel-eventstore)
 
 This package integrates Greg Young's `eventstore` into Laravel's event system. By simply implementing `ShouldBeEventStored` on your events, they will be sent to eventstore. In the same fashion you can also setup listeners that can respond to events that are received from the eventstore.
