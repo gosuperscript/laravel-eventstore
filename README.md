@@ -1,9 +1,9 @@
 # Laravel EventStore
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/mannum/laravel-eventstore.svg?style=flat-square)](https://packagist.org/packages/mannum/laravel-eventstore)
-[![Build Status](https://img.shields.io/travis/com/mannum/laravel-eventstore/master.svg?style=flat-square)](https://travis-ci.com/mannum/laravel-eventstore)
-[![Quality Score](https://img.shields.io/scrutinizer/g/mannum/laravel-eventstore.svg?style=flat-square)](https://scrutinizer-ci.com/g/mannum/laravel-eventstore)
-[![Total Downloads](https://img.shields.io/packagist/dt/mannum/laravel-eventstore.svg?style=flat-square)](https://packagist.org/packages/mannum/laravel-eventstore)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/digitalrisks/laravel-eventstore.svg?style=flat-square)](https://packagist.org/packages/digitalrisks/laravel-eventstore)
+[![Build Status](https://img.shields.io/travis/com/digitalrisks/laravel-eventstore/master.svg?style=flat-square)](https://travis-ci.com/digitalrisks/laravel-eventstore)
+[![Quality Score](https://img.shields.io/scrutinizer/g/digitalrisks/laravel-eventstore.svg?style=flat-square)](https://scrutinizer-ci.com/g/digitalrisks/laravel-eventstore)
+[![Total Downloads](https://img.shields.io/packagist/dt/digitalrisks/laravel-eventstore.svg?style=flat-square)](https://packagist.org/packages/digitalrisks/laravel-eventstore)
 
 This package integrates Greg Young's `eventstore` into Laravel's event system. By simply implementing `ShouldBeEventStored` on your events, they will be sent to eventstore. In the same fashion you can also setup listeners that can respond to events that are received from the eventstore.
 
@@ -12,7 +12,7 @@ This package integrates Greg Young's `eventstore` into Laravel's event system. B
 You can install the package via composer:
 
 ```bash
-composer require mannum/laravel-eventstore
+composer require digitalrisks/laravel-eventstore
 ```
 
 ## Usage - Sending Events
@@ -199,7 +199,7 @@ If you discover any security related issues, please email pawel.trauth@digitalri
 
 ## Credits
 
-- [Pawel Trauth](https://github.com/mannum)
+- [Pawel Trauth](https://github.com/digitalrisks)
 - [All Contributors](../../contributors)
 
 ## License
