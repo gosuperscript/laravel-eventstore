@@ -1,5 +1,5 @@
 {
-    "name": "mannum/laravel-eventstore",
+    "name": "digitalrisks/laravel-eventstore",
     "description": "All things regarding integrating Greg Young's Event Store into Laravel",
     "keywords": [
         "mannum",
