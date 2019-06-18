@@ -1,6 +1,6 @@
 <?php
 
-namespace Mannum\LaravelEventStore\Tests\Constraint;
+namespace DigitalRisks\LaravelEventStore\Tests\Constraint;
 
 use PHPUnit\Framework\ExpectationFailedException;
 

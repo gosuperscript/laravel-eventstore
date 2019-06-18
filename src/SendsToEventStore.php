@@ -1,6 +1,6 @@
 <?php
 
-namespace Mannum\LaravelEventStore;
+namespace DigitalRisks\LaravelEventStore;
 
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;

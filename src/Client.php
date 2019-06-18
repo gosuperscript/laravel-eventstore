@@ -1,6 +1,6 @@
 <?php
 
-namespace Mannum\LaravelEventStore;
+namespace DigitalRisks\LaravelEventStore;
 
 class Client extends \GuzzleHttp\Client
 {

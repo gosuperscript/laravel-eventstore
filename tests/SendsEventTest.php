@@ -1,10 +1,10 @@
 <?php
 
-namespace Mannum\LaravelEventStore\Tests;
+namespace DigitalRisks\LaravelEventStore\Tests;
 
-use Mannum\LaravelEventStore\ShouldBeEventStored;
-use Mannum\LaravelEventStore\Tests\Traits\InteractsWithEventStore;
-use Mannum\LaravelEventStore\SendsToEventStore;
+use DigitalRisks\LaravelEventStore\ShouldBeEventStored;
+use DigitalRisks\LaravelEventStore\Tests\Traits\InteractsWithEventStore;
+use DigitalRisks\LaravelEventStore\SendsToEventStore;
 
 class SendsEventTest extends TestCase
 {

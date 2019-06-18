@@ -42,9 +42,9 @@ To assist in implementing the interface, the package comes with a `SendsToEventS
 * Metadata: data from all of the methods marked with `@metadata` will be collected and serialized
 
 ``` php
-class QuoteStarted implements Mannum\LaravelEventStore\ShouldBeEventStored
+class QuoteStarted implements DigitalRisks\LaravelEventStore\ShouldBeEventStored
 {
-    use Mannum\LaravelEventStore\SendsToEventStore;
+    use DigitalRisks\LaravelEventStore\SendsToEventStore;
 }
 ```
 
@@ -64,9 +64,9 @@ Metadata can help trace events around your system. You can include any of the fo
 Or you can define your own methods to collect metadata. Any method with the `@metadata` annotation will be called:
 
 ``` php
-class QuoteStarted implements Mannum\LaravelEventStore\ShouldBeEventStored
+class QuoteStarted implements DigitalRisks\LaravelEventStore\ShouldBeEventStored
 {
-    use Mannum\LaravelEventStore\Tests\Traits\AddsLaravelMetadata;
+    use DigitalRisks\LaravelEventStore\Tests\Traits\AddsLaravelMetadata;
     
     /** @metadata */
     public function collectIpMetadata()
@@ -85,7 +85,7 @@ If you would like to test that your events are being fired correctly, you can us
 ``` php
 class QuoteStartedTest extends TestCase
 {
-    use Mannum\LaravelEventStore\Tests\Traits\InteractsWithEventStore;
+    use DigitalRisks\LaravelEventStore\Tests\Traits\InteractsWithEventStore;
 
     public function test_it_creates_an_event_when_a_quote_is_started()
     {
@@ -147,7 +147,7 @@ If you would like to test your listeners, the package comes with several helper 
 ``` php
 class QuoteStartedTest extends TestCase
 {
-    use \Mannum\LaravelEventStore\Tests\MakesEventRecords;
+    use \DigitalRisks\LaravelEventStore\Tests\MakesEventRecords;
 
     public function test_it_sends_an_email_when_a_quote_is_started()
     {
@@ -167,7 +167,7 @@ class QuoteStartedTest extends TestCase
 
 The defaults are set in `config/eventstore.php`. Copy this file to your own config directory to modify the values:
 
-    php artisan vendor:publish --provider="Mannum\LaravelEventStore\ServiceProvider"
+    php artisan vendor:publish --provider="DigitalRisks\LaravelEventStore\ServiceProvider"
 
 ``` php
 return [

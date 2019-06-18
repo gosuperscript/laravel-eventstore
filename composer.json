@@ -2,10 +2,10 @@
     "name": "digitalrisks/laravel-eventstore",
     "description": "All things regarding integrating Greg Young's Event Store into Laravel",
     "keywords": [
-        "mannum",
+        "digitalrisks",
         "laravel-event-store"
     ],
-    "homepage": "https://github.com/mannum/laravel-event-store",
+    "homepage": "https://github.com/digitalrisks/laravel-event-store",
     "license": "MIT",
     "type": "library",
     "authors": [
@@ -28,12 +28,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Mannum\\LaravelEventStore\\": "src"
+            "DigitalRisks\\LaravelEventStore\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Mannum\\LaravelEventStore\\Tests\\": "tests"
+            "DigitalRisks\\LaravelEventStore\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -47,7 +47,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Mannum\\LaravelEventStore\\ServiceProvider"
+                "DigitalRisks\\LaravelEventStore\\ServiceProvider"
             ]
         }
     }

@@ -1,9 +1,9 @@
 <?php
 
-namespace Mannum\LaravelEventStore\Tests;
+namespace DigitalRisks\LaravelEventStore\Tests;
 
 use Orchestra\Testbench\TestCase as Orchestra;
-use Mannum\LaravelEventStore\ServiceProvider;
+use DigitalRisks\LaravelEventStore\ServiceProvider;
 
 class TestCase extends Orchestra
 {

@@ -1,5 +1,4 @@
 {
-    "name": "@mannum/laravel-eventstore",
     "private": true,
     "release": {
         "verifyConditions": [

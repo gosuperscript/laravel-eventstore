@@ -1,6 +1,6 @@
 <?php
 
-namespace Mannum\LaravelEventStore;
+namespace DigitalRisks\LaravelEventStore;
 
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Illuminate\Support\Facades\Event;
