@@ -1,5 +1,6 @@
 {
     "private": true,
+    "name": "@digitalrisks/laravel-eventstore",
     "release": {
         "verifyConditions": [
             "@semantic-release/github"
