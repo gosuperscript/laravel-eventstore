@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use EventLoop\EventLoop;
 use Rxnet\EventStore\EventStore;
 use Rxnet\EventStore\Record\AcknowledgeableEventRecord;
+use Rxnet\EventStore\Record\EventRecord;
 
 class EventStoreWorker extends Command
 {
@@ -87,7 +88,7 @@ class EventStoreWorker extends Command
             }, 'report');
     }
 
-    protected function dispatch(AcknowledgeableEventRecord $event)
+    public function dispatch(EventRecord $event)
     {
         $type = $event->getType();
         $class = config('eventstore.namespace') . '\\' . $type;
