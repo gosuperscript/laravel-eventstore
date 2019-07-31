@@ -52,11 +52,11 @@ class EventStoreWorker extends Command
         $connection = $eventStore->connect(config('eventstore.tcp_url'));
         $streams = config('eventstore.streams');
 
-        $connection->subscribe(function () use ($eventStore, $streams) {
-            foreach ($streams as $stream) {
+        foreach ($streams as $stream) {
+            $connection->subscribe(function () use ($eventStore, $stream) {
                 $this->processStream($eventStore, $stream);
-            }
-        }, 'report');
+            }, 'report');
+        }
     }
 
     private function processStream($eventStore, string $stream)
