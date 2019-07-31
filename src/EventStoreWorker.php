@@ -48,15 +48,16 @@ class EventStoreWorker extends Command
 
     public function processAllStreams()
     {
-        $eventStore = new EventStore();
-        $connection = $eventStore->connect(config('eventstore.tcp_url'));
         $streams = config('eventstore.streams');
 
-        $connection->subscribe(function () use ($eventStore, $streams) {
-            foreach ($streams as $stream) {
+        foreach ($streams as $stream) {
+            $eventStore = new EventStore();
+            $connection = $eventStore->connect(config('eventstore.tcp_url'));
+
+            $connection->subscribe(function () use ($eventStore, $stream) {
                 $this->processStream($eventStore, $stream);
-            }
-        }, 'report');
+            }, 'report');
+        }
     }
 
     private function processStream($eventStore, string $stream)
