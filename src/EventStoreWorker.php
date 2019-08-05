@@ -6,8 +6,10 @@ use Illuminate\Console\Command;
 
 use EventLoop\EventLoop;
 use Rxnet\EventStore\EventStore;
+use Rxnet\EventStore\Data\EventRecord as EventData;
 use Rxnet\EventStore\Record\AcknowledgeableEventRecord;
 use Rxnet\EventStore\Record\EventRecord;
+use Rxnet\EventStore\Record\JsonEventRecord;
 
 class EventStoreWorker extends Command
 {
@@ -89,11 +91,25 @@ class EventStoreWorker extends Command
             }, 'report');
     }
 
-    public function dispatch(EventRecord $event)
+    public function dispatch(EventRecord $eventRecord)
     {
+        $event = $this->makeSerializableEvent($eventRecord);
+
         $type = $event->getType();
         $class = config('eventstore.namespace') . '\\' . $type;
 
         class_exists($class) ? event(new $class($event)) : event($type, $event);
+    }
+
+    protected function makeSerializableEvent(EventRecord $event)
+    {
+        $data = new EventData();
+
+        $data->setEventType($event->getType());
+        $data->setCreatedEpoch($event->getCreated()->getTimestamp() * 1000);
+        $data->setData(json_encode($event->getData()));
+        $data->setMetadata(json_encode($event->getMetadata()));
+
+        return new JsonEventRecord($data);
     }
 }
