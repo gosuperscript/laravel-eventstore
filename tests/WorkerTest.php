@@ -15,8 +15,7 @@ class WorkerTest extends TestCase
 {
     use InteractsWithEventStore, MakesEventRecords;
 
-    /** @test */
-    public function it_dispatches_an_event_from_a_subscribed_event()
+    public function test_it_dispatches_an_event_from_a_subscribed_event()
     {
         // Arrange.
         Event::fake();
@@ -34,8 +33,7 @@ class WorkerTest extends TestCase
         });
     }
 
-    /** @test */
-    public function it_dispatches_a_classed_event_from_a_subscribed_event()
+    public function test_it_dispatches_a_classed_event_from_a_subscribed_event()
     {
         // Arrange.
         Event::fake();
@@ -54,8 +52,7 @@ class WorkerTest extends TestCase
         });
     }
 
-    /** @test */
-    public function it_dispatches_a_classed_event_from_a_parked_event()
+    public function test_it_dispatches_a_classed_event_from_a_parked_event()
     {
         // Arrange.
         Event::fake();
