@@ -101,7 +101,36 @@ class QuoteStartedTest extends TestCase
 
 You must first run the worker which will listen for events. 
 
-    `php artisan eventstore:worker`
+*None of the options are not required. By default it will run the persistance subscription with a timeout of 10 seconds and 1 parallel event at a time.*
+
+``` sh
+$ php artisan eventstore:worker
+        {--persist : Run persistent mode.}
+        {--volatile : Run volatile mode.}
+        {--parallel= : How many events to run in parallel.}
+        {--timeout= : How long the event should time out for.}
+        
+$ php artisan eventstore:worker --persist
+
+$ php artisan eventstore:worker --persist --timeout=10
+
+$ php artisan eventstore:worker --persist --parallel=10
+
+$ php artisan eventstore:worker --persist --parallel=10 --timeout=5
+
+$ php artisan eventstore:worker --volatile
+
+$ php artisan eventstore:worker --volatile --timeout=10
+
+$ php artisan eventstore:worker --persist --volatile
+
+$ php artisan eventstore:worker --persist --volatile --timeout=10
+
+$ php artisan eventstore:worker --persist --volatile --parallel=10
+
+$ php artisan eventstore:worker --persist --volatile --parallel=10 --timeout=5
+
+```
 
 When an event is received, it will be dispatched into Laravel's event system with the `event type` and the `EventRecord` as the payload. 
 
@@ -172,6 +201,7 @@ The defaults are set in `config/eventstore.php`. Copy this file to your own conf
 return [
     'tcp_url' => 'tls://admin:changeit@localhost:1113',
     'http_url' => 'http://admin:changeit@localhost:2113',
+    'volatile_streams' => ['quotes', 'accounts'],
     'streams' => ['quotes', 'accounts'],
     'group' => 'quote-email-senderer',
     'namespace' => 'App\Events'
