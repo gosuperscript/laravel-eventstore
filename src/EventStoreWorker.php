@@ -3,7 +3,6 @@
 namespace DigitalRisks\LaravelEventStore;
 
 use Carbon\Carbon;
-use DigitalRisks\LaravelEventStore\AbstractWorker;
 use EventLoop\EventLoop;
 use Illuminate\Console\Command;
 use Rxnet\EventStore\Data\EventRecord as EventData;
@@ -24,8 +23,6 @@ class EventStoreWorker extends Command
 
     protected $loop;
 
-    private $timeout = 10;
-
     public function __construct()
     {
         parent::__construct();
@@ -35,7 +32,7 @@ class EventStoreWorker extends Command
 
     public function handle(): void
     {
-        $this->timeout = $this->option('timeout', 10);
+        $timeout = $this->option('timeout') ?? 10;
 
         $this->loop->stop();
 
@@ -46,9 +43,9 @@ class EventStoreWorker extends Command
             report($e);
         }
 
-        $this->error("Lost connection with EventStore - reconnecting in $this->timeout");
+        $this->error('Lost connection with EventStore - reconnecting in ' . $timeout);
 
-        sleep($this->timeout);
+        sleep($timeout);
 
         $this->handle();
     }
