@@ -51,7 +51,7 @@ class EventStoreWorker extends Command
         $this->handle();
     }
 
-    public function processAllStreams(): void
+    private function processAllStreams(): void
     {
         if($this->option('persist') || (!$this->option('persist') && !$this->option('volatile'))) {
             $this->connectToStream('eventstore.streams');
@@ -65,7 +65,7 @@ class EventStoreWorker extends Command
     }
 
 
-    public function connectToStream($config, $callback = null): void
+    private function connectToStream($config, $callback = null): void
     {
         $streams = config($config);
 
@@ -82,7 +82,7 @@ class EventStoreWorker extends Command
         }
     }
 
-    public function processStream($eventStore, string $stream): void
+    private function processStream($eventStore, string $stream): void
     {
         $eventStore
             ->persistentSubscription($stream, config('eventstore.group'), $this->option('parallel') ?? 1)
@@ -108,7 +108,7 @@ class EventStoreWorker extends Command
             }, 'report');
     }
 
-    public function processVolatileStream($eventStore, string $stream): void
+    private function processVolatileStream($eventStore, string $stream): void
     {
         $eventStore
             ->volatileSubscription($stream)
@@ -134,7 +134,7 @@ class EventStoreWorker extends Command
             }, 'report');
     }
 
-    public function dispatch(EventRecord $eventRecord): void
+    private function dispatch(EventRecord $eventRecord): void
     {
         $event = $this->makeSerializableEvent($eventRecord);
 
@@ -144,7 +144,7 @@ class EventStoreWorker extends Command
         class_exists($class) ? event(new $class($event)) : event($type, $event);
     }
 
-    protected function makeSerializableEvent(EventRecord $event): JsonEventRecord
+    private function makeSerializableEvent(EventRecord $event): JsonEventRecord
     {
         $data = new EventData();
 
