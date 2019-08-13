@@ -101,7 +101,7 @@ class QuoteStartedTest extends TestCase
 
 You must first run the worker which will listen for events. 
 
-*None of the options are not required. By default it will run the persistance subscription with a timeout of 10 seconds and 1 parallel event at a time.*
+*None of the options are required. By default it will run the persistance subscription with a timeout of 10 seconds and 1 parallel event at a time.*
 
 ``` sh
 $ php artisan eventstore:worker
