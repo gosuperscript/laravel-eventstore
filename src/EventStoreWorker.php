@@ -2,13 +2,14 @@
 
 namespace DigitalRisks\LaravelEventStore;
 
-use Rxnet\EventStore\EventStore;
-use Rxnet\EventStore\Record\AcknowledgeableEventRecord;
-use Rxnet\EventStore\Record\EventRecord;
+use Carbon\Carbon;
 use DigitalRisks\LaravelEventStore\AbstractWorker;
 use EventLoop\EventLoop;
 use Illuminate\Console\Command;
 use Rxnet\EventStore\Data\EventRecord as EventData;
+use Rxnet\EventStore\EventStore;
+use Rxnet\EventStore\Record\AcknowledgeableEventRecord;
+use Rxnet\EventStore\Record\EventRecord;
 use Rxnet\EventStore\Record\JsonEventRecord;
 
 class EventStoreWorker extends Command
@@ -35,6 +36,7 @@ class EventStoreWorker extends Command
     public function handle(): void
     {
         $this->timeout = $this->option('timeout', 10);
+
         $this->loop->stop();
 
         try {
@@ -53,42 +55,37 @@ class EventStoreWorker extends Command
 
     private function processAllStreams(): void
     {
-        if($this->option('persist') || (!$this->option('persist') && !$this->option('volatile'))) {
-            $this->connectToStream('eventstore.streams');
+        if ($this->option('persist') || (!$this->option('persist') && !$this->option('volatile'))) {
+            $this->connectToStream(config('eventstore.subscription_streams'), function (EventStore $eventStore, string $stream) {
+                $this->processPersistentStream($eventStore, $stream);
+            });
         }
 
-        if($this->option('volatile')) {
-            $this->connectToStream('eventstore.volatile_streams', function(EventStore $eventStore, string $stream) {
+        if ($this->option('volatile')) {
+            $this->connectToStream(config('eventstore.volatile_streams'), function (EventStore $eventStore, string $stream) {
                 $this->processVolatileStream($eventStore, $stream);
             });
         }
     }
 
 
-    private function connectToStream($config, $callback = null): void
+    private function connectToStream($streams, $callback): void
     {
-        $streams = config($config);
-
         foreach ($streams as $stream) {
             $eventStore = new EventStore();
             $connection = $eventStore->connect(config('eventstore.tcp_url'));
             $connection->subscribe(function () use ($eventStore, $stream, $callback) {
-                if (!$callback) {
-                    $this->processStream($eventStore, $stream);
-                } else {
-                    $callback($eventStore, $stream);
-                }
+                $callback($eventStore, $stream);
             }, 'report');
         }
     }
 
-    private function processStream($eventStore, string $stream): void
+    private function processPersistentStream($eventStore, string $stream): void
     {
         $eventStore
             ->persistentSubscription($stream, config('eventstore.group'), $this->option('parallel') ?? 1)
             ->subscribe(function (AcknowledgeableEventRecord $event) {
-                $url = config('eventstore.http_url') . "/streams/{$event->getStreamId()}/{$event->getNumber()} (persistent)";
-                $this->info($url);
+                $this->info('[' . Carbon::now()->toDateTimeString() . '] [persistent] ' . config('eventstore.http_url') . '/streams/ ' . $event->getStreamId() . '/' . $event->getNumber());
                 try {
                     $this->dispatch($event);
                     $event->ack();
@@ -113,11 +110,9 @@ class EventStoreWorker extends Command
         $eventStore
             ->volatileSubscription($stream)
             ->subscribe(function (EventRecord $event) {
-                $url = config('eventstore.http_url') . "/streams/{$event->getStreamId()}/{$event->getNumber()} (volatile)";
-                $this->info($url);
+                $this->info('[' . Carbon::now()->toDateTimeString() . '] [volatile] ' . config('eventstore.http_url') . '/streams/ ' . $event->getStreamId() . '/' . $event->getNumber());
                 try {
                     $this->dispatch($event);
-                    $event->ack();
                 } catch (\Exception $e) {
                     dump([
                         'id' => $event->getId(),
@@ -128,7 +123,6 @@ class EventStoreWorker extends Command
                         'data' => $event->getData(),
                         'metadata' => $event->getMetadata(),
                     ]);
-                    $event->nack();
                     report($e);
                 }
             }, 'report');

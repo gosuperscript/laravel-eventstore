@@ -202,7 +202,7 @@ return [
     'tcp_url' => 'tls://admin:changeit@localhost:1113',
     'http_url' => 'http://admin:changeit@localhost:2113',
     'volatile_streams' => ['quotes', 'accounts'],
-    'streams' => ['quotes', 'accounts'],
+    'subscription_streams' => ['quotes', 'accounts'],
     'group' => 'quote-email-senderer',
     'namespace' => 'App\Events'
 ];
