@@ -67,7 +67,7 @@ class EventStoreWorker extends Command
         $eventStore
             ->persistentSubscription($stream, config('eventstore.group'))
             ->subscribe(function (AcknowledgeableEventRecord $event) {
-                $url = config('eventstore.http_url')."/streams/{$event->getStreamId()}/{$event->getNumber()}";
+                $url = config('eventstore.http_url') . "/streams/{$event->getStreamId()}/{$event->getNumber()}";
                 $this->info($url);
 
                 try {
@@ -94,11 +94,31 @@ class EventStoreWorker extends Command
     public function dispatch(EventRecord $eventRecord)
     {
         $event = $this->makeSerializableEvent($eventRecord);
-
         $type = $event->getType();
-        $class = config('eventstore.namespace') . '\\' . $type;
+        $data = $event->getData();
+        $namespace = config('eventstore.namespace');
+        $meta = $event->getMetadata();
 
-        class_exists($class) ? event(new $class($event)) : event($type, $event);
+        if (isset($meta['eventstore_key']) && $meta['eventstore_key'] === config('eventstore.key')) {
+            return;
+        }
+
+        foreach (glob('app/Events/*.php') as $file) {
+            $classPath = $namespace . '\\' . basename($file, '.php');
+            if (class_exists($classPath) && !(new \ReflectionClass($classPath))->isAbstract()) {
+                $class = new $classPath($data);
+                if (method_exists($class, 'getEventType')) {
+                    if ($class->getEventType() === $type) {
+                        event($class);
+                        continue;
+                    }
+                }
+            }
+        }
+
+        if (!isset($class)) {
+            event($type, $event);
+        }
     }
 
     protected function makeSerializableEvent(EventRecord $event)
