@@ -14,10 +14,11 @@ class ServiceProvider extends LaravelServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/eventstore.php' => config_path('eventstore.php'),
+                __DIR__ . '/../config/eventstore.php' => config_path('eventstore.php'),
             ], 'config');
 
             $this->commands([
+                KeyGenerateCommand::class,
                 EventStoreWorker::class,
             ]);
         }
@@ -31,6 +32,6 @@ class ServiceProvider extends LaravelServiceProvider
     public function register()
     {
         // Automatically apply the package configuration
-        $this->mergeConfigFrom(__DIR__.'/../config/eventstore.php', 'eventstore');
+        $this->mergeConfigFrom(__DIR__ . '/../config/eventstore.php', 'eventstore');
     }
 }
