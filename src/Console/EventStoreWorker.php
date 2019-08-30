@@ -119,7 +119,9 @@ class EventStoreWorker extends Command
 
     protected function mapToLocalEvent($event)
     {
-        $class = config('eventstore.namespace') . '\\' . $event->getType();
+        $eventToClass = config('eventstore.event_to_class');
+        $className = $eventToClass ? $eventToClass($event) : $event->getType();
+        $class = config('eventstore.namespace') . '\\' . $className;
 
         if (! class_exists($class)) return;
 
