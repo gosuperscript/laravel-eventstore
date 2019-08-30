@@ -51,4 +51,29 @@ class WorkerTest extends TestCase
             return true;
         });
     }
+
+    /** @test */
+    public function it_dispatches_a_mapped_classed_event_from_a_subscribed_event()
+    {
+        // Arrange.
+        Event::fake();
+        $worker = resolve(EventStoreWorker::class);
+        $event = $this->makeEventRecord('test_event', ['hello' => 'world']);
+        config([
+            'eventstore.namespace' => 'DigitalRisks\LaravelEventStore\Tests\Fixtures',
+            'eventstore.event_to_class' => function ($event) {
+                return 'TestEvent';
+            }
+        ]);
+
+        // Act.
+        $worker->dispatch($event);
+
+        // Assert.
+        Event::assertDispatched(TestEvent::class, function (TestEvent $event) {
+            $this->assertEquals('world', $event->hello);
+
+            return true;
+        });
+    }
 }
