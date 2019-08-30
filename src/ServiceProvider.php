@@ -2,6 +2,9 @@
 
 namespace DigitalRisks\LaravelEventStore;
 
+use DigitalRisks\LaravelEventStore\Console\EventStoreWorker;
+use DigitalRisks\LaravelEventStore\Contracts\ShouldBeEventStored;
+use DigitalRisks\LaravelEventStore\Listeners\SendToEventStoreListener;
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Illuminate\Support\Facades\Event;
 

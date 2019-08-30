@@ -1,6 +1,6 @@
 <?php
 
-namespace DigitalRisks\LaravelEventStore;
+namespace DigitalRisks\LaravelEventStore\Contracts;
 
 use Ramsey\Uuid\UuidInterface;
 
