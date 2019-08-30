@@ -1,10 +1,8 @@
 # Laravel EventStore
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/digitalrisks/laravel-eventstore.svg?style=flat-square)](https://packagist.org/packages/digitalrisks/laravel-eventstore)
-[![Build Status](https://img.shields.io/travis/com/digitalrisks/laravel-eventstore/master.svg?style=flat-square)](https://travis-ci.com/digitalrisks/laravel-eventstore)
-[![Total Downloads](https://img.shields.io/packagist/dt/digitalrisks/laravel-eventstore.svg?style=flat-square)](https://packagist.org/packages/digitalrisks/laravel-eventstore)
-
 This package integrates Greg Young's `eventstore` into Laravel's event system. By simply implementing `ShouldBeEventStored` on your events, they will be sent to eventstore. In the same fashion you can also setup listeners that can respond to events that are received from the eventstore.
+
+Example implementation: https://github.com/digitalrisks/laravel-eventstore-example
 
 ## Installation
 
@@ -12,6 +10,32 @@ You can install the package via composer:
 
 ```bash
 composer require digitalrisks/laravel-eventstore
+```
+
+## Example Event
+
+``` php
+use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
+use DigitalRisks\LaravelEventStore\Contracts\ShouldBeEventStored;
+use DigitalRisks\LaravelEventStore\Traits\ReceivedFromEventStore;
+use DigitalRisks\LaravelEventStore\Traits\SendsToEventStore;
+
+class QuoteStarted implements ShouldBeEventStored, CouldBeReceived
+{
+    use SendsToEventStore, ReceivedFromEventStore;
+
+    public $email;
+
+    /**
+     * Create a new event instance.
+     *
+     * @return void
+     */
+    public function __construct($email)
+    {
+        $this->email = $email;
+    }
+}
 ```
 
 ## Usage - Sending Events
@@ -41,16 +65,25 @@ To assist in implementing the interface, the package comes with a `SendsToEventS
 * Metadata: data from all of the methods marked with `@metadata` will be collected and serialized
 
 ``` php
-class QuoteStarted implements DigitalRisks\LaravelEventStore\ShouldBeEventStored
+use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
+use DigitalRisks\LaravelEventStore\Contracts\ShouldBeEventStored;
+use DigitalRisks\LaravelEventStore\Traits\SendsToEventStore;
+
+class QuoteStarted implements ShouldBeEventStored, CouldBeReceived
 {
-    use DigitalRisks\LaravelEventStore\SendsToEventStore;
+    use SendsToEventStore;
+    
+    public function getEventStream(): string
+    {
+        return 'quotes';
+    }
 }
 ```
 
 Then raising an event is done in the normal Laravel way:
 
 ``` php
-event(new QuoteStarted($quote));
+event(new QuoteStarted('craig@gmail.com'));
 ```
 
 ### Metadata
@@ -63,9 +96,9 @@ Metadata can help trace events around your system. You can include any of the fo
 Or you can define your own methods to collect metadata. Any method with the `@metadata` annotation will be called:
 
 ``` php
-class QuoteStarted implements DigitalRisks\LaravelEventStore\ShouldBeEventStored
+class QuoteStarted implements ShouldBeEventStored
 {
-    use DigitalRisks\LaravelEventStore\Tests\Traits\AddsLaravelMetadata;
+    use DigitalRisks\LaravelEventStore\Traits\AddsLaravelMetadata;
     
     /** @metadata */
     public function collectIpMetadata()
@@ -92,7 +125,7 @@ class QuoteStartedTest extends TestCase
         $this->json('POST', '/api/quote', ['email' => 'quote@start.com']);
 
         // Assert.
-        $this->assertEventStoreEventRaised('quote_started', 'quotes', ['email' => 'quote@start.com']);
+        $this->assertEventStoreEventRaised('QuoteStarted', 'quotes', ['email' => 'quote@start.com']);
     }
 }
 ```
@@ -103,7 +136,7 @@ You must first run the worker which will listen for events.
 
     `php artisan eventstore:worker`
 
-When an event is received, it will be dispatched into Laravel's event system with the `event type` and the `EventRecord` as the payload. 
+When an event is received, it will be mapped to the Laravel event and the original `EventRecord` can be accessed via `getEventRecord()`. 
 
 You can react to these events in the normal Laravel fashion. 
 
@@ -111,7 +144,7 @@ You can react to these events in the normal Laravel fashion.
 class EventServiceProvider extends ServiceProvider
 {
     protected $listen = [
-        'quote_started' => [SendQuoteStartedEmail::class],
+        QuoteStarted::class => [SendQuoteStartedEmail::class],
     ];
 }
 ```
@@ -119,22 +152,33 @@ class EventServiceProvider extends ServiceProvider
 ``` php
 class SendQuoteStartedEmail
 {
-    public function handle(\Rxnet\EventStore\Record\EventRecord $event)
+    public function handle(QuoteStarted $event)
     {
-        Mail::to($event->getData()['email'])->send('Here is your quote');
+        Mail::to($event->email)->send('Here is your quote');
     }
 }
 ```
 
-If you would like to map received events to Laravel events and then dispatch them, the event type must match the name of your Laravel event and it must accept the `EventRecord` in the constructor. 
+If you are listening to the same stream where you are firing events, your events WILL BE fired twice - once by Laravel and once received from the event store. You may choose react synchronously if `$event->getEventRecord()` is false and asynchronously if `$event->getEventRecord()` returns the eventstore record. 
 
 ``` php
-<?php
-
-class QuoteStarted
+class SendQuoteStartedEmail
 {
-    public function __construct(\Rxnet\EventStore\Record\EventRecord $event)
+    public function handle(QuoteStarted $event)
     {
+        if (! $event->getEventRecord()) return;
+
+        Mail::to($event->email)->send('Here is your quote');
+    }
+}
+
+class SaveQuoteToDatabase
+{
+    public function handle(QuoteStarted $event)
+    {
+        if ($event->getEventRecord()) return;
+
+        Quote::create(['email' => $event->email]);
     }
 }
 ```
@@ -174,7 +218,10 @@ return [
     'http_url' => 'http://admin:changeit@localhost:2113',
     'streams' => ['quotes', 'accounts'],
     'group' => 'quote-email-senderer',
-    'namespace' => 'App\Events'
+    'namespace' => 'App\Events',
+    'event_to_class' => function ($event) {
+        return $event->getType();
+    }
 ];
 ```
 
