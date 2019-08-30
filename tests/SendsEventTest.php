@@ -2,9 +2,9 @@
 
 namespace DigitalRisks\LaravelEventStore\Tests;
 
-use DigitalRisks\LaravelEventStore\ShouldBeEventStored;
+use DigitalRisks\LaravelEventStore\Contracts\ShouldBeEventStored;
 use DigitalRisks\LaravelEventStore\Tests\Traits\InteractsWithEventStore;
-use DigitalRisks\LaravelEventStore\SendsToEventStore;
+use DigitalRisks\LaravelEventStore\Traits\SendsToEventStore;
 
 class SendsEventTest extends TestCase
 {
