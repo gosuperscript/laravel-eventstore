@@ -1,10 +1,12 @@
 <?php
 
-namespace DigitalRisks\LaravelEventStore;
+namespace DigitalRisks\LaravelEventStore\Console\Commands;
 
+use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
 use Illuminate\Console\Command;
 
 use EventLoop\EventLoop;
+use ReflectionClass;
 use Rxnet\EventStore\EventStore;
 use Rxnet\EventStore\Data\EventRecord as EventData;
 use Rxnet\EventStore\Record\AcknowledgeableEventRecord;
@@ -17,7 +19,7 @@ class EventStoreWorker extends Command
 
     private $timeout = 10;
 
-    protected $signature = 'eventstore:worker';
+    protected $signature = 'eventstore:worker --replay';
 
     protected $description = 'Worker handling incoming events from ES';
 
@@ -95,10 +97,12 @@ class EventStoreWorker extends Command
     {
         $event = $this->makeSerializableEvent($eventRecord);
 
-        $type = $event->getType();
-        $class = config('eventstore.namespace') . '\\' . $type;
-
-        class_exists($class) ? event(new $class($event)) : event($type, $event);
+        if ($localEvent = $this->mapToLocalEvent($event)) {
+            event($localEvent);
+        }
+        else {
+            event($event->getType(), $event);
+        }
     }
 
     protected function makeSerializableEvent(EventRecord $event)
@@ -111,5 +115,22 @@ class EventStoreWorker extends Command
         $data->setMetadata(json_encode($event->getMetadata()));
 
         return new JsonEventRecord($data);
+    }
+
+    protected function mapToLocalEvent($event)
+    {
+        $eventToClass = config('eventstore.event_to_class');
+        $className = $eventToClass ? $eventToClass($event) : 'App\Events\\' . $event->getType();
+
+        if (! class_exists($className)) return;
+
+        $reflection = new ReflectionClass($className);
+
+        if (! $reflection->implementsInterface(CouldBeReceived::class)) return;
+
+        $localEvent = $reflection->newInstanceArgs($event->getData());
+        $localEvent->setEventRecord($event);
+
+        return $localEvent;
     }
 }

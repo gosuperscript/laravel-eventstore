@@ -2,14 +2,18 @@
 
 namespace DigitalRisks\LaravelEventStore\Tests\Fixtures;
 
+use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
+use DigitalRisks\LaravelEventStore\Traits\ReceivedFromEventStore;
 use Rxnet\EventStore\Record\EventRecord;
 
-class TestEvent
+class TestEvent implements CouldBeReceived
 {
-    public $event;
+    use ReceivedFromEventStore;
 
-    public function __construct(EventRecord $event)
+    public $hello;
+
+    public function __construct(string $value)
     {
-        $this->event = $event;
+        $this->hello = $value;
     }
 }
