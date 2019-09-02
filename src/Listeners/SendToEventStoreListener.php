@@ -4,7 +4,7 @@ namespace DigitalRisks\LaravelEventStore\Listeners;
 
 use DigitalRisks\LaravelEventStore\Client;
 use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
-use DigitalRisks\LaravelEventStore\Contracts\ShouldBeEventStored;
+use DigitalRisks\LaravelEventStore\Contracts\ShouldBeStored;
 
 class SendToEventStoreListener
 {
@@ -13,7 +13,7 @@ class SendToEventStoreListener
         $this->client = $client;
     }
 
-    public function handle(ShouldBeEventStored $event)
+    public function handle(ShouldBeStored $event)
     {
         // The event has already been stored, so never send it out...
         if ($event instanceof CouldBeReceived && $event->getEventRecord()) {

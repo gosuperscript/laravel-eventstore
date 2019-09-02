@@ -5,8 +5,7 @@ return [
     'http_url' => env('EVENTSTORE_HTTP_URL', 'http://admin:changeit@localhost:2113'),
     'streams' => [],
     'group' => '',
-    'namespace' => 'App\Events',
     'event_to_class' => function ($event) {
-        return $event->getType();
+        return 'App\Events\\' . $event->getType();
     }
 ];

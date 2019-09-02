@@ -2,7 +2,7 @@
 
 namespace DigitalRisks\LaravelEventStore\Tests;
 
-use DigitalRisks\LaravelEventStore\Contracts\ShouldBeEventStored;
+use DigitalRisks\LaravelEventStore\Contracts\ShouldBeStored;
 use DigitalRisks\LaravelEventStore\Tests\Traits\InteractsWithEventStore;
 use DigitalRisks\LaravelEventStore\Traits\SendsToEventStore;
 
@@ -14,7 +14,7 @@ class SendsEventTest extends TestCase
     public function it_sends_the_event_to_eventstore()
     {
         // Arrange.
-        $event = new class implements ShouldBeEventStored {
+        $event = new class implements ShouldBeStored {
             use SendsToEventStore;
 
             public function getEventStream(): string { return 'tests'; }

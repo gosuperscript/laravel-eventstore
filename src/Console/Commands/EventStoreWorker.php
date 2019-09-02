@@ -1,6 +1,6 @@
 <?php
 
-namespace DigitalRisks\LaravelEventStore\Console;
+namespace DigitalRisks\LaravelEventStore\Console\Commands;
 
 use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
 use Illuminate\Console\Command;
@@ -120,12 +120,11 @@ class EventStoreWorker extends Command
     protected function mapToLocalEvent($event)
     {
         $eventToClass = config('eventstore.event_to_class');
-        $className = $eventToClass ? $eventToClass($event) : $event->getType();
-        $class = config('eventstore.namespace') . '\\' . $className;
+        $className = $eventToClass ? $eventToClass($event) : 'App\Events\\' . $event->getType();
 
-        if (! class_exists($class)) return;
+        if (! class_exists($className)) return;
 
-        $reflection = new ReflectionClass($class);
+        $reflection = new ReflectionClass($className);
 
         if (! $reflection->implementsInterface(CouldBeReceived::class)) return;
 
