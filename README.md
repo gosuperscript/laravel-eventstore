@@ -83,7 +83,7 @@ class QuoteStarted implements ShouldBeEventStored, CouldBeReceived
 Then raising an event is done in the normal Laravel way:
 
 ``` php
-event(new QuoteStarted('craig@gmail.com'));
+event(new QuoteStarted(['email' => 'quote@start.com']));
 ```
 
 ### Metadata
