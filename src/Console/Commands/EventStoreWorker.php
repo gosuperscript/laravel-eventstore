@@ -1,12 +1,16 @@
 <?php
 
-namespace DigitalRisks\LaravelEventStore;
+namespace DigitalRisks\LaravelEventStore\Console\Commands;
+
+use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
+use Illuminate\Console\Command;
 
 use Carbon\Carbon;
 use EventLoop\EventLoop;
-use Illuminate\Console\Command;
-use Rxnet\EventStore\Data\EventRecord as EventData;
+use ReflectionClass;
+use ReflectionProperty;
 use Rxnet\EventStore\EventStore;
+use Rxnet\EventStore\Data\EventRecord as EventData;
 use Rxnet\EventStore\Record\AcknowledgeableEventRecord;
 use Rxnet\EventStore\Record\EventRecord;
 use Rxnet\EventStore\Record\JsonEventRecord;
@@ -21,7 +25,9 @@ class EventStoreWorker extends Command
 
     protected $description = 'Worker handling incoming events from ES';
 
-    protected $loop;
+    private $loop;
+
+    private $timeout = 10;
 
     public function __construct()
     {
@@ -129,10 +135,12 @@ class EventStoreWorker extends Command
     {
         $event = $this->makeSerializableEvent($eventRecord);
 
-        $type = $event->getType();
-        $class = config('eventstore.namespace') . '\\' . $type;
-
-        class_exists($class) ? event(new $class($event)) : event($type, $event);
+        if ($localEvent = $this->mapToLocalEvent($event)) {
+            event($localEvent);
+        }
+        else {
+            event($event->getType(), $event);
+        }
     }
 
     private function makeSerializableEvent(EventRecord $event): JsonEventRecord
@@ -145,5 +153,30 @@ class EventStoreWorker extends Command
         $data->setMetadata(json_encode($event->getMetadata()));
 
         return new JsonEventRecord($data);
+    }
+
+    protected function mapToLocalEvent($event)
+    {
+        $eventToClass = config('eventstore.event_to_class');
+        $className = $eventToClass ? $eventToClass($event) : 'App\Events\\' . $event->getType();
+
+        if (! class_exists($className)) return;
+
+        $reflection = new ReflectionClass($className);
+
+        if (! $reflection->implementsInterface(CouldBeReceived::class)) return;
+
+        $localEvent = new $className();
+        $props = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
+        $data = $event->getData();
+
+        foreach ($props as $prop) {
+            $key = $prop->getName();
+            $localEvent->$key = $data[$key] ?? null;
+        }
+
+        $localEvent->setEventRecord($event);
+
+        return $localEvent;
     }
 }

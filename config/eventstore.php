@@ -6,5 +6,7 @@ return [
     'subscription_streams' => [],
     'volatile_streams' => [],
     'group' => '',
-    'namespace' => 'App\Events'
+    'event_to_class' => function ($event) {
+        return 'App\Events\\' . $event->getType();
+    }
 ];

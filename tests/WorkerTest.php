@@ -2,11 +2,9 @@
 
 namespace DigitalRisks\LaravelEventStore\Tests;
 
-use DigitalRisks\LaravelEventStore\ShouldBeEventStored;
+use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreWorker;
 use DigitalRisks\LaravelEventStore\Tests\Traits\InteractsWithEventStore;
-use DigitalRisks\LaravelEventStore\SendsToEventStore;
 use DigitalRisks\LaravelEventStore\Tests\Traits\MakesEventRecords;
-use DigitalRisks\LaravelEventStore\EventStoreWorker;
 use Illuminate\Support\Facades\Event;
 use Rxnet\EventStore\Record\EventRecord;
 use DigitalRisks\LaravelEventStore\Tests\Fixtures\TestEvent;
@@ -38,34 +36,19 @@ class WorkerTest extends TestCase
         // Arrange.
         Event::fake();
         $worker = resolve(EventStoreWorker::class);
-        $event = $this->makeEventRecord('TestEvent', ['hello' => 'world']);
-        config(['eventstore.namespace' => 'DigitalRisks\LaravelEventStore\Tests\Fixtures']);
+        $event = $this->makeEventRecord('test_event', ['hello' => 'world']);
+        config([
+            'eventstore.event_to_class' => function ($event) {
+                return 'DigitalRisks\LaravelEventStore\Tests\Fixtures\TestEvent';
+            }
+        ]);
 
         // Act.
         $worker->dispatch($event);
 
         // Assert.
         Event::assertDispatched(TestEvent::class, function (TestEvent $event) {
-            $this->assertEquals(['hello' => 'world'], $event->event->getData());
-
-            return true;
-        });
-    }
-
-    public function test_it_dispatches_a_classed_event_from_a_parked_event()
-    {
-        // Arrange.
-        Event::fake();
-        $worker = resolve(EventStoreWorker::class);
-        $event = $this->makeEventRecord('TestEvent', ['hello' => 'world']);
-        config(['eventstore.namespace' => 'DigitalRisks\LaravelEventStore\Tests\Fixtures']);
-
-        // Act.
-        $worker->dispatch($event);
-
-        // Assert.
-        Event::assertDispatched(TestEvent::class, function (TestEvent $event) {
-            $this->assertEquals(['hello' => 'world'], $event->event->getData());
+            $this->assertEquals('world', $event->hello);
 
             return true;
         });
