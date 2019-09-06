@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 
 use EventLoop\EventLoop;
 use ReflectionClass;
+use ReflectionProperty;
 use Rxnet\EventStore\EventStore;
 use Rxnet\EventStore\Data\EventRecord as EventData;
 use Rxnet\EventStore\Record\AcknowledgeableEventRecord;
@@ -128,7 +129,15 @@ class EventStoreWorker extends Command
 
         if (! $reflection->implementsInterface(CouldBeReceived::class)) return;
 
-        $localEvent = $reflection->newInstanceArgs($event->getData());
+        $localEvent = new $className();
+        $props = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
+        $data = $event->getData();
+
+        foreach ($props as $prop) {
+            $key = $prop->getName();
+            $localEvent->$key = $data[$key] ?? null;
+        }
+
         $localEvent->setEventRecord($event);
 
         return $localEvent;

@@ -31,7 +31,7 @@ class QuoteStarted implements ShouldBeStored, CouldBeReceived
      *
      * @return void
      */
-    public function __construct($email)
+    public function __construct($email = null)
     {
         $this->email = $email;
     }

@@ -12,7 +12,7 @@ class TestEvent implements CouldBeReceived
 
     public $hello;
 
-    public function __construct(string $value)
+    public function __construct(string $value = null)
     {
         $this->hello = $value;
     }
