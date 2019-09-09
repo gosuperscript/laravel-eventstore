@@ -17,17 +17,11 @@ use Rxnet\EventStore\Record\JsonEventRecord;
 
 class EventStoreWorker extends Command
 {
-    protected $signature = 'eventstore:worker
-        {--persist : Run persistent mode.}
-        {--volatile : Run volatile mode.}
-        {--parallel= : How many events to run in parallel.}
-        {--timeout= : How long the event should time out for.}';
+    protected $signature = 'eventstore:worker {--parallel= : How many events to run in parallel.} {--timeout= : How long the event should time out for.}';
 
     protected $description = 'Worker handling incoming events from ES';
 
     private $loop;
-
-    private $timeout = 10;
 
     public function __construct()
     {
@@ -58,17 +52,13 @@ class EventStoreWorker extends Command
 
     private function processAllStreams(): void
     {
-        if ($this->option('persist') || (!$this->option('persist') && !$this->option('volatile'))) {
-            $this->connectToStream(config('eventstore.subscription_streams'), function (EventStore $eventStore, string $stream) {
-                $this->processPersistentStream($eventStore, $stream);
-            });
-        }
+        $this->connectToStream(config('eventstore.subscription_streams'), function (EventStore $eventStore, string $stream) {
+            $this->processPersistentStream($eventStore, $stream);
+        });
 
-        if ($this->option('volatile')) {
-            $this->connectToStream(config('eventstore.volatile_streams'), function (EventStore $eventStore, string $stream) {
-                $this->processVolatileStream($eventStore, $stream);
-            });
-        }
+        $this->connectToStream(config('eventstore.volatile_streams'), function (EventStore $eventStore, string $stream) {
+            $this->processVolatileStream($eventStore, $stream);
+        });
     }
 
 
@@ -88,7 +78,7 @@ class EventStoreWorker extends Command
         $eventStore
             ->persistentSubscription($stream, config('eventstore.group'), $this->option('parallel') ?? 1)
             ->subscribe(function (AcknowledgeableEventRecord $event) {
-                $this->info('[' . Carbon::now()->toDateTimeString() . '] [persistent] ' . config('eventstore.http_url') . '/streams/ ' . $event->getStreamId() . '/' . $event->getNumber());
+                $this->info('[' . Carbon::now()->toDateTimeString() . '] [persistent] ' . config('eventstore.http_url') . '/streams/' . $event->getStreamId() . '/' . $event->getNumber());
                 try {
                     $this->dispatch($event);
                     $event->ack();
@@ -113,7 +103,7 @@ class EventStoreWorker extends Command
         $eventStore
             ->volatileSubscription($stream)
             ->subscribe(function (EventRecord $event) {
-                $this->info('[' . Carbon::now()->toDateTimeString() . '] [volatile] ' . config('eventstore.http_url') . '/streams/ ' . $event->getStreamId() . '/' . $event->getNumber());
+                $this->info('[' . Carbon::now()->toDateTimeString() . '] [volatile] ' . config('eventstore.http_url') . '/streams/' . $event->getStreamId() . '/' . $event->getNumber());
                 try {
                     $this->dispatch($event);
                 } catch (\Exception $e) {

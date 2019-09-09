@@ -137,32 +137,9 @@ You must first run the worker which will listen for events.
 *None of the options are required. By default it will run the persistance subscription with a timeout of 10 seconds and 1 parallel event at a time.*
 
 ``` sh
-$ php artisan eventstore:worker
-        {--persist : Run persistent mode.}
-        {--volatile : Run volatile mode.}
-        {--parallel= : How many events to run in parallel.}
-        {--timeout= : How long the event should time out for.}
-        
-$ php artisan eventstore:worker --persist
+$ php artisan eventstore:worker {--parallel= : How many events to run in parallel.} {--timeout= : How long the event should time out for.}
 
-$ php artisan eventstore:worker --persist --timeout=10
-
-$ php artisan eventstore:worker --persist --parallel=10
-
-$ php artisan eventstore:worker --persist --parallel=10 --timeout=5
-
-$ php artisan eventstore:worker --volatile
-
-$ php artisan eventstore:worker --volatile --timeout=10
-
-$ php artisan eventstore:worker --persist --volatile
-
-$ php artisan eventstore:worker --persist --volatile --timeout=10
-
-$ php artisan eventstore:worker --persist --volatile --parallel=10
-
-$ php artisan eventstore:worker --persist --volatile --parallel=10 --timeout=5
-
+$ php artisan eventstore:worker --parallel=10 --timeout=5
 ```
 
 When an event is received, it will be mapped to the Laravel event and the original `EventRecord` can be accessed via `getEventRecord()`. 
