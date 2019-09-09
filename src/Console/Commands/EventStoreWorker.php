@@ -131,7 +131,7 @@ class EventStoreWorker extends Command
             }, 'report');
     }
 
-    private function dispatch(EventRecord $eventRecord): void
+    public function dispatch(EventRecord $eventRecord): void
     {
         $event = $this->makeSerializableEvent($eventRecord);
 
