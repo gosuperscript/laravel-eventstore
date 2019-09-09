@@ -134,7 +134,36 @@ class AccountCreatedTest extends TestCase
 
 You must first run the worker which will listen for events. 
 
-    `php artisan eventstore:worker`
+*None of the options are required. By default it will run the persistance subscription with a timeout of 10 seconds and 1 parallel event at a time.*
+
+``` sh
+$ php artisan eventstore:worker
+        {--persist : Run persistent mode.}
+        {--volatile : Run volatile mode.}
+        {--parallel= : How many events to run in parallel.}
+        {--timeout= : How long the event should time out for.}
+        
+$ php artisan eventstore:worker --persist
+
+$ php artisan eventstore:worker --persist --timeout=10
+
+$ php artisan eventstore:worker --persist --parallel=10
+
+$ php artisan eventstore:worker --persist --parallel=10 --timeout=5
+
+$ php artisan eventstore:worker --volatile
+
+$ php artisan eventstore:worker --volatile --timeout=10
+
+$ php artisan eventstore:worker --persist --volatile
+
+$ php artisan eventstore:worker --persist --volatile --timeout=10
+
+$ php artisan eventstore:worker --persist --volatile --parallel=10
+
+$ php artisan eventstore:worker --persist --volatile --parallel=10 --timeout=5
+
+```
 
 When an event is received, it will be mapped to the Laravel event and the original `EventRecord` can be accessed via `getEventRecord()`. 
 
@@ -216,11 +245,11 @@ The defaults are set in `config/eventstore.php`. Copy this file to your own conf
 return [
     'tcp_url' => 'tls://admin:changeit@localhost:1113',
     'http_url' => 'http://admin:changeit@localhost:2113',
-    'streams' => ['accounts'],
     'group' => 'account-email-subscription',
-    'namespace' => 'App\Events',
+    'volatile_streams' => ['quotes', 'accounts'],
+    'subscription_streams' => ['quotes', 'accounts'],
     'event_to_class' => function ($event) {
-        return $event->getType();
+        return 'App\Events\\' . $event->getType();
     }
 ];
 ```

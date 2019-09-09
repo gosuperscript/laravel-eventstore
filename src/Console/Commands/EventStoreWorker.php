@@ -5,6 +5,7 @@ namespace DigitalRisks\LaravelEventStore\Console\Commands;
 use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
 use Illuminate\Console\Command;
 
+use Carbon\Carbon;
 use EventLoop\EventLoop;
 use ReflectionClass;
 use ReflectionProperty;
@@ -16,15 +17,17 @@ use Rxnet\EventStore\Record\JsonEventRecord;
 
 class EventStoreWorker extends Command
 {
-    private $loop;
-
-    private $timeout = 10;
-
-    protected $signature = 'eventstore:worker --replay';
+    protected $signature = 'eventstore:worker
+        {--persist : Run persistent mode.}
+        {--volatile : Run volatile mode.}
+        {--parallel= : How many events to run in parallel.}
+        {--timeout= : How long the event should time out for.}';
 
     protected $description = 'Worker handling incoming events from ES';
 
-    protected $eventstore;
+    private $loop;
+
+    private $timeout = 10;
 
     public function __construct()
     {
@@ -33,8 +36,10 @@ class EventStoreWorker extends Command
         $this->loop = EventLoop::getLoop();
     }
 
-    public function handle()
+    public function handle(): void
     {
+        $timeout = $this->option('timeout') ?? 10;
+
         $this->loop->stop();
 
         try {
@@ -44,35 +49,46 @@ class EventStoreWorker extends Command
             report($e);
         }
 
-        $this->error("Lost connection with EventStore - reconnecting in $this->timeout");
+        $this->error('Lost connection with EventStore - reconnecting in ' . $timeout);
 
-        sleep($this->timeout);
+        sleep($timeout);
 
         $this->handle();
     }
 
-    public function processAllStreams()
+    private function processAllStreams(): void
     {
-        $streams = config('eventstore.streams');
+        if ($this->option('persist') || (!$this->option('persist') && !$this->option('volatile'))) {
+            $this->connectToStream(config('eventstore.subscription_streams'), function (EventStore $eventStore, string $stream) {
+                $this->processPersistentStream($eventStore, $stream);
+            });
+        }
 
+        if ($this->option('volatile')) {
+            $this->connectToStream(config('eventstore.volatile_streams'), function (EventStore $eventStore, string $stream) {
+                $this->processVolatileStream($eventStore, $stream);
+            });
+        }
+    }
+
+
+    private function connectToStream($streams, $callback): void
+    {
         foreach ($streams as $stream) {
             $eventStore = new EventStore();
             $connection = $eventStore->connect(config('eventstore.tcp_url'));
-
-            $connection->subscribe(function () use ($eventStore, $stream) {
-                $this->processStream($eventStore, $stream);
+            $connection->subscribe(function () use ($eventStore, $stream, $callback) {
+                $callback($eventStore, $stream);
             }, 'report');
         }
     }
 
-    private function processStream($eventStore, string $stream)
+    private function processPersistentStream($eventStore, string $stream): void
     {
         $eventStore
-            ->persistentSubscription($stream, config('eventstore.group'))
+            ->persistentSubscription($stream, config('eventstore.group'), $this->option('parallel') ?? 1)
             ->subscribe(function (AcknowledgeableEventRecord $event) {
-                $url = config('eventstore.http_url')."/streams/{$event->getStreamId()}/{$event->getNumber()}";
-                $this->info($url);
-
+                $this->info('[' . Carbon::now()->toDateTimeString() . '] [persistent] ' . config('eventstore.http_url') . '/streams/ ' . $event->getStreamId() . '/' . $event->getNumber());
                 try {
                     $this->dispatch($event);
                     $event->ack();
@@ -86,15 +102,36 @@ class EventStoreWorker extends Command
                         'data' => $event->getData(),
                         'metadata' => $event->getMetadata(),
                     ]);
-
                     $event->nack();
-
                     report($e);
                 }
             }, 'report');
     }
 
-    public function dispatch(EventRecord $eventRecord)
+    private function processVolatileStream($eventStore, string $stream): void
+    {
+        $eventStore
+            ->volatileSubscription($stream)
+            ->subscribe(function (EventRecord $event) {
+                $this->info('[' . Carbon::now()->toDateTimeString() . '] [volatile] ' . config('eventstore.http_url') . '/streams/ ' . $event->getStreamId() . '/' . $event->getNumber());
+                try {
+                    $this->dispatch($event);
+                } catch (\Exception $e) {
+                    dump([
+                        'id' => $event->getId(),
+                        'number' => $event->getNumber(),
+                        'stream' => $event->getStreamId(),
+                        'type' => $event->getType(),
+                        'created' => $event->getCreated(),
+                        'data' => $event->getData(),
+                        'metadata' => $event->getMetadata(),
+                    ]);
+                    report($e);
+                }
+            }, 'report');
+    }
+
+    public function dispatch(EventRecord $eventRecord): void
     {
         $event = $this->makeSerializableEvent($eventRecord);
 
@@ -106,7 +143,7 @@ class EventStoreWorker extends Command
         }
     }
 
-    protected function makeSerializableEvent(EventRecord $event)
+    private function makeSerializableEvent(EventRecord $event): JsonEventRecord
     {
         $data = new EventData();
 
