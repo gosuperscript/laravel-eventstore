@@ -53,4 +53,18 @@ class WorkerTest extends TestCase
             return true;
         });
     }
+
+    public function test_it_handles_an_event_with_no_metadata()
+    {
+        // Arrange.
+        Event::fake();
+        $worker = resolve(EventStoreWorker::class);
+        $event = $this->makeEventRecord('test_event', ['hello' => 'world'], null);
+
+        // Act.
+        $worker->dispatch($event);
+
+        // Assert.
+        Event::assertDispatched('test_event');
+    }
 }
