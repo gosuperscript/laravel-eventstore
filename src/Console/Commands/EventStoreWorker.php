@@ -14,6 +14,7 @@ use Rxnet\EventStore\Data\EventRecord as EventData;
 use Rxnet\EventStore\Record\AcknowledgeableEventRecord;
 use Rxnet\EventStore\Record\EventRecord;
 use Rxnet\EventStore\Record\JsonEventRecord;
+use TypeError;
 
 class EventStoreWorker extends Command
 {
@@ -140,7 +141,13 @@ class EventStoreWorker extends Command
         $data->setEventType($event->getType());
         $data->setCreatedEpoch($event->getCreated()->getTimestamp() * 1000);
         $data->setData(json_encode($event->getData()));
-        $data->setMetadata(json_encode($event->getMetadata()));
+
+        try {
+            $data->setMetadata(json_encode($event->getMetadata()));
+        }
+        catch (TypeError $e) {
+
+        }
 
         return new JsonEventRecord($data);
     }
