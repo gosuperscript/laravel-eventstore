@@ -41,8 +41,8 @@ class EventsOnEventStoreConstraint extends EventStoreConstraint
                     sprintf(
                         'Event %s%s not found on Event Store%s',
                         $compareEvent->eventType,
-                        !empty($compareEvent->data) ? sprintf(' with data %s', json_encode($compareEvent->data)) : '',
-                        !empty($compareEvent->metaData) ? sprintf(' with metadata %s', json_encode($compareEvent->metaData)) : '',
+                        !empty($compareEvent->data) ? sprintf(' with data') : '',
+                        !empty($compareEvent->metaData) ? sprintf(' with metadata') : '',
                         !empty($compareEvent->streamName) ? sprintf(' on stream %s', $compareEvent->streamName) : ''
                     )
                 );
