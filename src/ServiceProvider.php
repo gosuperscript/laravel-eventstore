@@ -2,6 +2,9 @@
 
 namespace DigitalRisks\LaravelEventStore;
 
+use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreWorker;
+use DigitalRisks\LaravelEventStore\Contracts\ShouldBeStored;
+use DigitalRisks\LaravelEventStore\Listeners\SendToEventStoreListener;
 use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Illuminate\Support\Facades\Event;
 
@@ -22,7 +25,7 @@ class ServiceProvider extends LaravelServiceProvider
             ]);
         }
 
-        Event::listen(ShouldBeEventStored::class, SendToEventStoreListener::class);
+        Event::listen(ShouldBeStored::class, SendToEventStoreListener::class);
     }
 
     /**

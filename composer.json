@@ -18,12 +18,12 @@
     "require": {
         "php": "^7.1",
         "guzzlehttp/guzzle": "^6.3",
-        "illuminate/support": "5.7.* || 5.8.*",
+        "illuminate/support": "5.7.* || 5.8.* || ^6.0",
         "ramsey/uuid": "^3.8",
         "rxnet/eventstore-client": "^3.0.2"
     },
     "require-dev": {
-        "orchestra/testbench": "3.8.*",
+        "orchestra/testbench": "^4.0",
         "phpunit/phpunit": "^8.0"
     },
     "autoload": {

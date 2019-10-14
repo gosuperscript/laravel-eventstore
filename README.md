@@ -1,10 +1,8 @@
 # Laravel EventStore
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/digitalrisks/laravel-eventstore.svg?style=flat-square)](https://packagist.org/packages/digitalrisks/laravel-eventstore)
-[![Build Status](https://img.shields.io/travis/com/digitalrisks/laravel-eventstore/master.svg?style=flat-square)](https://travis-ci.com/digitalrisks/laravel-eventstore)
-[![Total Downloads](https://img.shields.io/packagist/dt/digitalrisks/laravel-eventstore.svg?style=flat-square)](https://packagist.org/packages/digitalrisks/laravel-eventstore)
+This package integrates Greg Young's `eventstore` into Laravel's event system. By simply implementing `ShouldBeStored` on your events, they will be sent to eventstore. In the same fashion you can also setup listeners that can respond to events that are received from the eventstore.
 
-This package integrates Greg Young's `eventstore` into Laravel's event system. By simply implementing `ShouldBeEventStored` on your events, they will be sent to eventstore. In the same fashion you can also setup listeners that can respond to events that are received from the eventstore.
+Example implementation: https://github.com/digitalrisks/laravel-eventstore-example
 
 ## Installation
 
@@ -14,12 +12,38 @@ You can install the package via composer:
 composer require digitalrisks/laravel-eventstore
 ```
 
-## Usage - Sending Events
-
-The package will automatically send events dispatched in Laravel that implement the `ShouldBeEventStored` interface.
+## Example Event
 
 ``` php
-interface ShouldBeEventStored
+use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
+use DigitalRisks\LaravelEventStore\Contracts\ShouldBeStored;
+use DigitalRisks\LaravelEventStore\Traits\ReceivedFromEventStore;
+use DigitalRisks\LaravelEventStore\Traits\SendsToEventStore;
+
+class QuoteStarted implements ShouldBeStored, CouldBeReceived
+{
+    use SendsToEventStore, ReceivedFromEventStore;
+
+    public $email;
+
+    /**
+     * Create a new event instance.
+     *
+     * @return void
+     */
+    public function __construct($email = null)
+    {
+        $this->email = $email;
+    }
+}
+```
+
+## Usage - Sending Events
+
+The package will automatically send events dispatched in Laravel that implement the `ShouldBeStored` interface.
+
+``` php
+interface ShouldBeStored
 {
     public function getEventStream(): string;
 
@@ -41,16 +65,25 @@ To assist in implementing the interface, the package comes with a `SendsToEventS
 * Metadata: data from all of the methods marked with `@metadata` will be collected and serialized
 
 ``` php
-class QuoteStarted implements DigitalRisks\LaravelEventStore\ShouldBeEventStored
+use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
+use DigitalRisks\LaravelEventStore\Contracts\ShouldBeStored;
+use DigitalRisks\LaravelEventStore\Traits\SendsToEventStore;
+
+class AccountCreated implements ShouldBeStored, CouldBeReceived
 {
-    use DigitalRisks\LaravelEventStore\SendsToEventStore;
+    use SendsToEventStore;
+    
+    public function getEventStream(): string
+    {
+        return 'accounts';
+    }
 }
 ```
 
 Then raising an event is done in the normal Laravel way:
 
 ``` php
-event(new QuoteStarted($quote));
+event(new AccountCreated('foo@bar.com'));
 ```
 
 ### Metadata
@@ -63,9 +96,9 @@ Metadata can help trace events around your system. You can include any of the fo
 Or you can define your own methods to collect metadata. Any method with the `@metadata` annotation will be called:
 
 ``` php
-class QuoteStarted implements DigitalRisks\LaravelEventStore\ShouldBeEventStored
+class AccountCreated implements ShouldBeStored
 {
-    use DigitalRisks\LaravelEventStore\Tests\Traits\AddsLaravelMetadata;
+    use DigitalRisks\LaravelEventStore\Traits\AddsLaravelMetadata;
     
     /** @metadata */
     public function collectIpMetadata()
@@ -82,11 +115,11 @@ class QuoteStarted implements DigitalRisks\LaravelEventStore\ShouldBeEventStored
 If you would like to test that your events are being fired correctly, you can use the Laravel `Event::mock` method, or the package comes with helpers that interact with an eventstore to confirm they have been stored correctly. 
 
 ``` php
-class QuoteStartedTest extends TestCase
+class AccountCreatedTest extends TestCase
 {
     use DigitalRisks\LaravelEventStore\Tests\Traits\InteractsWithEventStore;
 
-    public function test_it_creates_an_event_when_a_quote_is_started()
+    public function test_it_creates_an_event_when_an_account_is_created()
     {
         // Act.
         $this->json('POST', '/api/quote', ['email' => 'quote@start.com', 'first_name' => "Foo"]);
@@ -126,9 +159,15 @@ class QuoteStartedTest extends TestCase
 
 You must first run the worker which will listen for events. 
 
-    `php artisan eventstore:worker`
+*None of the options are required. By default it will run the persistance subscription with a timeout of 10 seconds and 1 parallel event at a time.*
 
-When an event is received, it will be dispatched into Laravel's event system with the `event type` and the `EventRecord` as the payload. 
+``` sh
+$ php artisan eventstore:worker {--parallel= : How many events to run in parallel.} {--timeout= : How long the event should time out for.}
+
+$ php artisan eventstore:worker --parallel=10 --timeout=5
+```
+
+When an event is received, it will be mapped to the Laravel event and the original `EventRecord` can be accessed via `getEventRecord()`. 
 
 You can react to these events in the normal Laravel fashion. 
 
@@ -136,30 +175,41 @@ You can react to these events in the normal Laravel fashion.
 class EventServiceProvider extends ServiceProvider
 {
     protected $listen = [
-        'quote_started' => [SendQuoteStartedEmail::class],
+        AccountCreated::class => [SendAccountCreatedEmail::class],
     ];
 }
 ```
 
 ``` php
-class SendQuoteStartedEmail
+class SendAccountCreatedEmail
 {
-    public function handle(\Rxnet\EventStore\Record\EventRecord $event)
+    public function handle(AccountCreated $event)
     {
-        Mail::to($event->getData()['email'])->send('Here is your quote');
+        Mail::to($event->email)->send('Here is your account');
     }
 }
 ```
 
-If you would like to map received events to Laravel events and then dispatch them, the event type must match the name of your Laravel event and it must accept the `EventRecord` in the constructor. 
+If you are listening to the same stream where you are firing events, your events WILL BE fired twice - once by Laravel and once received from the event store. You may choose react synchronously if `$event->getEventRecord()` is false and asynchronously if `$event->getEventRecord()` returns the eventstore record. 
 
 ``` php
-<?php
-
-class QuoteStarted
+class SendAccountCreatedEmail
 {
-    public function __construct(\Rxnet\EventStore\Record\EventRecord $event)
+    public function handle(AccountCreated $event)
     {
+        if (! $event->getEventRecord()) return;
+
+        Mail::to($event->email)->send('Here is your account');
+    }
+}
+
+class SaveAccountToDatabase
+{
+    public function handle(AccountCreated $event)
+    {
+        if ($event->getEventRecord()) return;
+
+        Account::create(['email' => $event->email]);
     }
 }
 ```
@@ -173,16 +223,16 @@ class QuoteStartedTest extends TestCase
 {
     use \DigitalRisks\LaravelEventStore\Tests\MakesEventRecords;
 
-    public function test_it_sends_an_email_when_a_quote_is_started()
+    public function test_it_sends_an_email_when_an_account_is_created()
     {
         // Arrange.
-        $event = $this->makeEventRecord('quote_started', ['email' => 'start@quotes.com');
+        $event = $this->makeEventRecord('AccountCreated', ['email' => 'foo@bar.com');
 
         // Act.
         event($event->getType(), $event);
 
         // Assert.
-        Mail::assertSentTo('start@quotes.com');
+        Mail::assertSentTo('foo@bar.com');
     }
 }
 ```
@@ -197,9 +247,26 @@ The defaults are set in `config/eventstore.php`. Copy this file to your own conf
 return [
     'tcp_url' => 'tls://admin:changeit@localhost:1113',
     'http_url' => 'http://admin:changeit@localhost:2113',
-    'streams' => ['quotes', 'accounts'],
-    'group' => 'quote-email-senderer',
-    'namespace' => 'App\Events'
+    'group' => 'account-email-subscription',
+    'volatile_streams' => ['quotes', 'accounts'],
+    'subscription_streams' => ['quotes', 'accounts'],
+    'event_to_class' => function ($event) {
+        return 'App\Events\\' . $event->getType();
+    }
+];
+```
+
+### Mapping events to Laravel Event Classes
+
+By default the event type will be used to create and fire a Laravel Event class. If your event types are named differently to your Laravel Event 
+Class names, you may specify a `event_to_class` callback in your configuration to return the appropriate class name.
+
+``` php
+return [
+    'event_to_class' => function ($event) {
+        // map account_created to AccountCreated
+        return Str::studly($event->getType());
+    }
 ];
 ```
 
