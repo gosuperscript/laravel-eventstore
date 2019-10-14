@@ -122,14 +122,14 @@ class AccountCreatedTest extends TestCase
     public function test_it_creates_an_event_when_an_account_is_created()
     {
         // Act.
-        $this->json('POST', '/api/quote', ['email' => 'quote@start.com', 'first_name' => "Foo"]);
+        $this->json('POST', '/api/accounts', ['email' => 'foo@bar.com', 'firstName' => 'Foo']);
 
         // Assert.
 
         // Assertion will check the existence of attribute within the event data
         // - event can contain other attributes, besides the checked one
-        $this->assertEventStoreEventRaised('quote_started', 'quotes', ['email' => 'quote@start.com']);
-        $this->assertEventStoreEventNotRaised('quote_started', 'quotes', ['email' => 'not-quote@start.com']);
+        $this->assertEventStoreEventRaised('AccountCreated', 'accounts', ['email' => 'foo@bar.com']);
+        $this->assertEventStoreEventNotRaised('AccountCreated', 'accounts', ['email' => 'xyz@bar.com']);
     }
 }
 ```
@@ -145,11 +145,11 @@ class QuoteStartedTest extends TestCase
     public function test_it_creates_an_event_when_a_quote_is_started()
     {
         // Act.
-        $this->json('POST', '/api/quote', ['email' => 'quote@start.com']);
+        $this->json('POST', '/api/accounts', ['email' => 'foo@bar.com', 'firstName' => 'Foo']);
 
         // Assert.
-        $this->assertEventStoreEventRaised('quote_started', 'quotes', function($item) {
-            return strpos($item['email'], '@start.com') !== false;
+        $this->assertEventStoreEventRaised('AccountCreated', 'accounts', function($item) {
+            return strpos($item['email'], '@bar.com') !== false;
         });
     }
 }
