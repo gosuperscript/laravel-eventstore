@@ -15,7 +15,7 @@ trait InteractsWithEventStore
     // and somehow collapsing observables - PT
 
     // assert that event was raised
-    public function assertEventStoreEventRaised($class, string $stream, ?array $data = null, ?array $metadata = null, int $limit = 1)
+    public function assertEventStoreEventRaised($class, string $stream, $data = null, $metadata = null, int $limit = 1)
     {
         static::assertThat((object) [
             'class' => $class,
@@ -29,7 +29,7 @@ trait InteractsWithEventStore
     }
 
     // assert that event was not raised
-    public function assertEventStoreEventNotRaised($class, string $stream, ?array $data = null, ?array $metadata = null, int $limit = 1)
+    public function assertEventStoreEventNotRaised($class, string $stream, $data = null, $metadata = null, int $limit = 1)
     {
         static::assertThat((object) [
             'class' => $class,
