@@ -6,6 +6,7 @@ use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
 use Illuminate\Console\Command;
 
 use Carbon\Carbon;
+use DigitalRisks\LaravelEventStore\Contracts\Logger;
 use EventLoop\EventLoop;
 use Illuminate\Support\Facades\Log;
 use ReflectionClass;
@@ -25,12 +26,15 @@ class EventStoreWorker extends Command
 
     private $loop;
 
-    public function __construct()
+    protected $logger;
+
+    public function __construct(Logger $logger)
     {
         parent::__construct();
 
         $this->loop = EventLoop::getLoop();
-    }
+        $this->logger = $logger;
+  }
 
     public function handle(): void
     {
@@ -80,7 +84,6 @@ class EventStoreWorker extends Command
         $eventStore
             ->persistentSubscription($stream, config('eventstore.group'), $this->option('parallel') ?? 1)
             ->subscribe(function (AcknowledgeableEventRecord $event) {
-                $this->logEventStart($event, 'persistent');
                 try {
                     $this->dispatch($event);
                     $event->ack();
@@ -97,7 +100,6 @@ class EventStoreWorker extends Command
         $eventStore
             ->volatileSubscription($stream)
             ->subscribe(function (EventRecord $event) {
-                $this->logEventStart($event, 'volatile');
                 try {
                     $this->dispatch($event);
                 } catch (\Exception $e) {
@@ -105,17 +107,6 @@ class EventStoreWorker extends Command
                     report($e);
                 }
             }, 'report');
-    }
-
-    protected function logEventStart(EventRecord $event, $type = '')
-    {
-        $url = parse_url(config('eventstore.http_url'));
-        $url = "{$url['scheme']}://{$url['host']}:{$url['port']}";
-
-        $stream = $event->getStreamId();
-        $number = $event->getNumber();
-
-        Log::info("{$url}/streams/{$stream}/{$number}", ['type' => $type]);
     }
 
     protected function dumpEvent(EventRecord $event)
@@ -143,14 +134,17 @@ class EventStoreWorker extends Command
 
     public function dispatch(EventRecord $eventRecord): void
     {
-        $event = $this->makeSerializableEvent($eventRecord);
+        $jsonEvent = $this->makeSerializableEvent($eventRecord);
+        $event = $jsonEvent->getType();
+        $payload = $jsonEvent;
 
-        if ($localEvent = $this->mapToLocalEvent($event)) {
-            event($localEvent);
+        if ($localEvent = $this->mapToLocalEvent($jsonEvent)) {
+            $event = $localEvent;
+            $payload = null;
         }
-        else {
-            event($event->getType(), $event);
-        }
+
+        $this->logger->eventStart($event, $payload);
+        event($event, $payload);
     }
 
     private function makeSerializableEvent(EventRecord $event): JsonEventRecord
