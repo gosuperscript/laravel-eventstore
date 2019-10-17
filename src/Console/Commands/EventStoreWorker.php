@@ -151,9 +151,12 @@ class EventStoreWorker extends Command
     {
         $data = new EventData();
 
+        $data->setEventStreamId($event->getStreamId());
+        $data->setEventNumber($event->getNumber());
+        $data->setEventId($event->getId());
         $data->setEventType($event->getType());
-        $data->setCreatedEpoch($event->getCreated()->getTimestamp() * 1000);
         $data->setData(json_encode($event->getData()));
+        $data->setCreatedEpoch($event->getCreated()->getTimestamp() * 1000);
         $data->setMetadata(json_encode($this->safeGetMetadata($event)));
 
         return new JsonEventRecord($data);
