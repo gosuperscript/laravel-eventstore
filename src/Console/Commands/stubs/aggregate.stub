@@ -1,0 +1,37 @@
+<?php
+
+namespace DummyNamespace;
+
+use App\Events\IncrementEvent;
+use App\Events\DecrementEvent;
+
+final class DummyClass
+{
+    /**
+     * Trigger increment Event.
+     *
+     * @return DummyNamespace\DummyClass
+     */
+    public function increment(): DummyClass
+    {
+        $event = new IncrementEvent();
+        $event->total = 1;
+        event($event);
+
+        return $this;
+    }
+
+    /**
+     * Trigger decrement Event.
+     *
+     * @return DummyNamespace\DummyClass
+     */
+    public function decrement(): DummyClass
+    {
+        $event = new DecrementEvent();
+        $event->total = -1;
+        event($event);
+
+        return $this;
+    }
+}
