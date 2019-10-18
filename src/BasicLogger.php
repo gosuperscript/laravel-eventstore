@@ -11,7 +11,7 @@ class BasicLogger implements Logger
     public function eventStart($eventOrType, $payloadOrEvent)
     {
         $url = parse_url(config('eventstore.http_url'));
-        $url = "{$url['scheme']}://{$url['host']}:{$url['port']}";
+        $url = "{$url['scheme']}://{$url['host']}:{$url['port']}/web/index.html#";
 
         $type = $eventOrType;
         $event = $payloadOrEvent;
