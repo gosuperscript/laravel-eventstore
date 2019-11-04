@@ -12,6 +12,65 @@ You can install the package via composer:
 composer require digitalrisks/laravel-eventstore
 ```
 
+Add the base service provider for the package.
+
+``` php
+<?php
+
+namespace App\Providers;
+
+use DigitalRisks\LaravelEventStore\EventStore;
+use DigitalRisks\LaravelEventStore\ServiceProvider as EventStoreApplicationServiceProvider;
+
+class EventStoreServiceProvider extends EventStoreApplicationServiceProvider
+{
+    /**
+     * Bootstrap the application services.
+     */
+    public function boot()
+    {
+        parent::boot();
+
+        // This will set your events to be the following '\\App\Events\\' . $event->getType();.
+        EventStore::eventToClass();
+
+        // You can customise this by doing the following
+        EventStore::eventToClass(function ($event) {
+            return 'App\Events\\' . Str::studly($event->getType());
+        });
+    }
+
+    /**
+     * Register the application services.
+     */
+    public function register()
+    {
+        parent::register();
+    }
+}
+
+```
+
+In your `config/app.php` file, add the following to the `providers` array.
+
+``` php
+    /*
+    |--------------------------------------------------------------------------
+    | Autoloaded Service Providers
+    |--------------------------------------------------------------------------
+    |
+    | The service providers listed here will be automatically loaded on the
+    | request to your application. Feel free to add your own services to
+    | this array to grant expanded functionality to your applications.
+    |
+    */
+
+    'providers' => [
+        ...
+        App\Providers\EventStoreServiceProvider::class,
+    ],
+```
+
 ## Example Event
 
 ``` php
@@ -92,6 +151,7 @@ Metadata can help trace events around your system. You can include any of the fo
 
 * `AddsHerokuMetadata`
 * `AddsLaravelMetadata`
+* `AddsUserMetaData`
 
 Or you can define your own methods to collect metadata. Any method with the `@metadata` annotation will be called:
 
@@ -225,23 +285,6 @@ return [
     'group' => 'account-email-subscription',
     'volatile_streams' => ['quotes', 'accounts'],
     'subscription_streams' => ['quotes', 'accounts'],
-    'event_to_class' => function ($event) {
-        return 'App\Events\\' . $event->getType();
-    }
-];
-```
-
-### Mapping events to Laravel Event Classes
-
-By default the event type will be used to create and fire a Laravel Event class. If your event types are named differently to your Laravel Event 
-Class names, you may specify a `event_to_class` callback in your configuration to return the appropriate class name.
-
-``` php
-return [
-    'event_to_class' => function ($event) {
-        // map account_created to AccountCreated
-        return Str::studly($event->getType());
-    }
 ];
 ```
 
@@ -265,7 +308,9 @@ If you discover any security related issues, please email pawel.trauth@digitalri
 
 ## Credits
 
-- [Pawel Trauth](https://github.com/digitalrisks)
+- [Pawel Trauth](https://github.com/eithed)
+- [Craig Morris](https://github.com/morrislaptop)
+- [Kani Robinson](https://github.com/kanirobinson)
 - [All Contributors](../../contributors)
 
 ## License
