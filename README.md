@@ -56,7 +56,7 @@ class EventStoreServiceProvider extends EventStoreApplicationServiceProvider
      */
     public function logger()
     {
-        // This will setup the logger for when an event happends.
+        // This will setup the logger for when an event happens.
         EventStore::logger();
 
         // You can customise this by doing the following.
