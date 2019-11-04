@@ -3,15 +3,14 @@
 namespace DigitalRisks\LaravelEventStore\Console\Commands;
 
 use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
-use Illuminate\Console\Command;
-
-use Carbon\Carbon;
+use DigitalRisks\LaravelEventStore\EventStore as LaravelEventStore;
 use EventLoop\EventLoop;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use ReflectionClass;
 use ReflectionProperty;
-use Rxnet\EventStore\EventStore;
 use Rxnet\EventStore\Data\EventRecord as EventData;
+use Rxnet\EventStore\EventStore;
 use Rxnet\EventStore\Record\AcknowledgeableEventRecord;
 use Rxnet\EventStore\Record\EventRecord;
 use Rxnet\EventStore\Record\JsonEventRecord;
@@ -135,8 +134,7 @@ class EventStoreWorker extends Command
     {
         try {
             return $event->getMetadata();
-        }
-        catch (TypeError $e) {
+        } catch (TypeError $e) {
             return [];
         }
     }
@@ -147,8 +145,7 @@ class EventStoreWorker extends Command
 
         if ($localEvent = $this->mapToLocalEvent($event)) {
             event($localEvent);
-        }
-        else {
+        } else {
             event($event->getType(), $event);
         }
     }
@@ -167,14 +164,18 @@ class EventStoreWorker extends Command
 
     protected function mapToLocalEvent($event)
     {
-        $eventToClass = config('eventstore.event_to_class');
+        $eventToClass = LaravelEventStore::$eventToClass;
         $className = $eventToClass ? $eventToClass($event) : 'App\Events\\' . $event->getType();
 
-        if (! class_exists($className)) return;
+        if (!class_exists($className)) {
+            return;
+        }
 
         $reflection = new ReflectionClass($className);
 
-        if (! $reflection->implementsInterface(CouldBeReceived::class)) return;
+        if (!$reflection->implementsInterface(CouldBeReceived::class)) {
+            return;
+        }
 
         $localEvent = new $className();
         $props = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);

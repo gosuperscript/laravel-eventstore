@@ -6,7 +6,4 @@ return [
     'subscription_streams' => array_filter(explode(',', env('EVENTSTORE_SUBSCRIPTION_STREAMS'))),
     'volatile_streams' => array_filter(explode(',', env('EVENTSTORE_VOLATILE_STREAMS'))),
     'group' => env('EVENTSTORE_SUBSCRIPTION_GROUP', env('APP_NAME', 'laravel')),
-    'event_to_class' => function ($event) {
-        return 'App\Events\\' . $event->getType();
-    }
 ];

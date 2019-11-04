@@ -4,9 +4,10 @@ namespace DigitalRisks\LaravelEventStore;
 
 use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreWorker;
 use DigitalRisks\LaravelEventStore\Contracts\ShouldBeStored;
+use DigitalRisks\LaravelEventStore\EventStore;
 use DigitalRisks\LaravelEventStore\Listeners\SendToEventStoreListener;
-use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
 
 class ServiceProvider extends LaravelServiceProvider
 {
@@ -17,7 +18,7 @@ class ServiceProvider extends LaravelServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/eventstore.php' => config_path('eventstore.php'),
+                __DIR__ . '/../config/eventstore.php' => config_path('eventstore.php'),
             ], 'config');
 
             $this->commands([
@@ -34,6 +35,10 @@ class ServiceProvider extends LaravelServiceProvider
     public function register()
     {
         // Automatically apply the package configuration
-        $this->mergeConfigFrom(__DIR__.'/../config/eventstore.php', 'eventstore');
+        $this->mergeConfigFrom(__DIR__ . '/../config/eventstore.php', 'eventstore');
+
+        $this->app->singleton(EventStore::class, function () {
+            return new EventStore;
+        });
     }
 }
