@@ -16,6 +16,7 @@ class ServiceProvider extends LaravelServiceProvider
      */
     public function boot()
     {
+        $this->eventClasses();
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../config/eventstore.php' => config_path('eventstore.php'),
@@ -27,6 +28,16 @@ class ServiceProvider extends LaravelServiceProvider
         }
 
         Event::listen(ShouldBeStored::class, SendToEventStoreListener::class);
+    }
+
+    /**
+     * Set the eventToClass method.
+     *
+     * @return void
+     */
+    public function eventClasses()
+    {
+        EventStore::eventToClass();
     }
 
     /**

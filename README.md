@@ -19,6 +19,7 @@ Add the base service provider for the package.
 
 namespace App\Providers;
 
+use Illuminate\Support\Str;
 use DigitalRisks\LaravelEventStore\EventStore;
 use DigitalRisks\LaravelEventStore\ServiceProvider as EventStoreApplicationServiceProvider;
 
@@ -30,11 +31,19 @@ class EventStoreServiceProvider extends EventStoreApplicationServiceProvider
     public function boot()
     {
         parent::boot();
+    }
 
+    /**
+     * Set the eventToClass method.
+     *
+     * @return void
+     */
+    public function eventClasses()
+    {
         // This will set your events to be the following '\\App\Events\\' . $event->getType();.
         EventStore::eventToClass();
 
-        // You can customise this by doing the following
+        // You can customise this by doing the following.
         EventStore::eventToClass(function ($event) {
             return 'App\Events\\' . Str::studly($event->getType());
         });
