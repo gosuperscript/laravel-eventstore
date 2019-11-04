@@ -52,8 +52,6 @@ class WorkerTest extends TestCase
 
             return true;
         });
-
-        $this->assertTrue(true);
     }
 
     public function test_it_handles_an_event_with_no_metadata()
