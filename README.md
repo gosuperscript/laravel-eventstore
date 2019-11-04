@@ -50,6 +50,22 @@ class EventStoreServiceProvider extends EventStoreApplicationServiceProvider
     }
 
     /**
+     * Handle logging when event is triggered.
+     *
+     * @return void
+     */
+    public function logger()
+    {
+        // This will setup the logger for when an event happens.
+        EventStore::logger();
+
+        // You can customise this by doing the following.
+        EventStore::logger(function ($event, $type) {
+            Log::info($event->getType());
+        });
+    }
+
+    /**
      * Register the application services.
      */
     public function register()

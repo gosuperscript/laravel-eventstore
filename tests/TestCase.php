@@ -11,6 +11,7 @@ class TestCase extends Orchestra
     protected function getPackageProviders($app)
     {
         EventStore::eventToClass();
+        EventStore::logger();
 
         return [
             ServiceProvider::class,
