@@ -2,6 +2,7 @@
 
 namespace DigitalRisks\LaravelEventStore;
 
+use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreReset;
 use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreWorker;
 use DigitalRisks\LaravelEventStore\Contracts\ShouldBeStored;
 use DigitalRisks\LaravelEventStore\Listeners\SendToEventStoreListener;
@@ -22,6 +23,7 @@ class ServiceProvider extends LaravelServiceProvider
 
             $this->commands([
                 EventStoreWorker::class,
+                EventStoreReset::class,
             ]);
         }
 
