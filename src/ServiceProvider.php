@@ -29,6 +29,7 @@ class ServiceProvider extends LaravelServiceProvider
         }
 
         $this->eventClasses();
+        $this->events();
         $this->logger();
 
         Event::listen(ShouldBeStored::class, SendToEventStoreListener::class);
@@ -52,6 +53,19 @@ class ServiceProvider extends LaravelServiceProvider
     public function logger()
     {
         EventStore::logger();
+    }
+
+    /**
+     * Handle event events.
+     *
+     * @return void
+     */
+    public function events()
+    {
+        EventStore::onStart();
+        EventStore::onSuccess();
+        EventStore::onError();
+        EventStore::onFinish();
     }
 
     /**

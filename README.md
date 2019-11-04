@@ -66,6 +66,30 @@ class EventStoreServiceProvider extends EventStoreApplicationServiceProvider
     }
 
     /**
+     * Handle event events.
+     *
+     * @return void
+     */
+    public function events()
+    {
+        EventStore::onStart(function ($event) {
+            // Do something before running event.
+        });
+
+        EventStore::onSuccess(function ($event) {
+            // Do something after event has successfully run.
+        });
+
+        EventStore::onError(function ($e, $event) {
+            // Do something when an event errors.
+        });
+
+        EventStore::onFinish(function ($event) {
+            // Do something when event has finished running.
+        });
+    }
+
+    /**
      * Register the application services.
      */
     public function register()

@@ -76,31 +76,49 @@ class EventStoreWorker extends Command
 
     private function processPersistentStream($eventStore, string $stream): void
     {
+        $onStart = LaravelEventStore::$onStart;
+        $onSuccess = LaravelEventStore::$onSuccess;
+        $onError = LaravelEventStore::$onError;
+        $onFinish = LaravelEventStore::$onFinish;
+
         $eventStore
             ->persistentSubscription($stream, config('eventstore.group'), $this->option('parallel') ?? 1)
-            ->subscribe(function (AcknowledgeableEventRecord $event) {
+            ->subscribe(function (AcknowledgeableEventRecord $event) use ($onStart, $onSuccess, $onError, $onFinish) {
+                $onStart($event);
                 try {
                     $this->dispatch($event);
                     $event->ack();
+                    $onSuccess($event);
                 } catch (\Exception $e) {
                     $this->dumpEvent($event);
                     $event->nack();
+                    $onError($e, $event);
                     report($e);
                 }
+                $onFinish($event);
             }, 'report');
     }
 
     private function processVolatileStream($eventStore, string $stream): void
     {
+        $onStart = LaravelEventStore::$onStart;
+        $onSuccess = LaravelEventStore::$onSuccess;
+        $onError = LaravelEventStore::$onError;
+        $onFinish = LaravelEventStore::$onFinish;
+
         $eventStore
             ->volatileSubscription($stream)
-            ->subscribe(function (EventRecord $event) {
+            ->subscribe(function (EventRecord $event) use ($onStart, $onSuccess, $onError, $onFinish) {
+                $onStart($event);
                 try {
                     $this->dispatch($event);
+                    $onSuccess($event);
                 } catch (\Exception $e) {
                     $this->dumpEvent($event);
+                    $onError($e, $event);
                     report($e);
                 }
+                $onFinish($event);
             }, 'report');
     }
 
