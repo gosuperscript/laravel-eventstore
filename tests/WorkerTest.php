@@ -3,11 +3,12 @@
 namespace DigitalRisks\LaravelEventStore\Tests;
 
 use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreWorker;
+use DigitalRisks\LaravelEventStore\EventStore;
+use DigitalRisks\LaravelEventStore\Tests\Fixtures\TestEvent;
 use DigitalRisks\LaravelEventStore\Tests\Traits\InteractsWithEventStore;
 use DigitalRisks\LaravelEventStore\Tests\Traits\MakesEventRecords;
 use Illuminate\Support\Facades\Event;
 use Rxnet\EventStore\Record\EventRecord;
-use DigitalRisks\LaravelEventStore\Tests\Fixtures\TestEvent;
 
 class WorkerTest extends TestCase
 {
@@ -37,11 +38,10 @@ class WorkerTest extends TestCase
         Event::fake();
         $worker = resolve(EventStoreWorker::class);
         $event = $this->makeEventRecord('test_event', ['hello' => 'world']);
-        config([
-            'eventstore.event_to_class' => function ($event) {
-                return 'DigitalRisks\LaravelEventStore\Tests\Fixtures\TestEvent';
-            }
-        ]);
+
+        EventStore::eventToClass(function ($event) {
+            return 'DigitalRisks\LaravelEventStore\Tests\Fixtures\TestEvent';
+        });
 
         // Act.
         $worker->dispatch($event);
@@ -52,6 +52,8 @@ class WorkerTest extends TestCase
 
             return true;
         });
+
+        $this->assertTrue(true);
     }
 
     public function test_it_handles_an_event_with_no_metadata()
