@@ -128,7 +128,7 @@ class EventStore
     public static function onError(?callable $callback = null)
     {
         $callback = $callback ?: function ($e, $event) {
-            $data = [
+            dump([
                 'id' => $event->getId(),
                 'number' => $event->getNumber(),
                 'stream' => $event->getStreamId(),
@@ -136,9 +136,8 @@ class EventStore
                 'created' => $event->getCreated(),
                 'data' => $event->getData(),
                 'metadata' => self::safeGetMetaData($event),
-            ];
+            ]);
 
-            dump($data);
             report($e);
         };
 
