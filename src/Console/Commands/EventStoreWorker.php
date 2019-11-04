@@ -6,7 +6,6 @@ use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
 use DigitalRisks\LaravelEventStore\EventStore as LaravelEventStore;
 use EventLoop\EventLoop;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 use ReflectionClass;
 use ReflectionProperty;
 use Rxnet\EventStore\Data\EventRecord as EventData;
@@ -62,7 +61,6 @@ class EventStoreWorker extends Command
         });
     }
 
-
     private function connectToStream($streams, $callback): void
     {
         foreach ($streams as $stream) {
@@ -76,77 +74,40 @@ class EventStoreWorker extends Command
 
     private function processPersistentStream($eventStore, string $stream): void
     {
-        $onStart = LaravelEventStore::$onStart;
-        $onSuccess = LaravelEventStore::$onSuccess;
-        $onError = LaravelEventStore::$onError;
-        $onFinish = LaravelEventStore::$onFinish;
-
         $eventStore
             ->persistentSubscription($stream, config('eventstore.group'), $this->option('parallel') ?? 1)
-            ->subscribe(function (AcknowledgeableEventRecord $event) use ($onStart, $onSuccess, $onError, $onFinish) {
-                $onStart($event);
+            ->subscribe(function (AcknowledgeableEventRecord $event) {
+                (LaravelEventStore::$onStart)($event);
                 try {
                     $this->dispatch($event);
                     $event->ack();
-                    $onSuccess($event);
+                    (LaravelEventStore::$onSuccess)($event);
                 } catch (\Exception $e) {
-                    $this->dumpEvent($event);
                     $event->nack();
-                    $onError($e, $event);
-                    report($e);
+                    (LaravelEventStore::$onError)($e, $event);
                 }
-                $onFinish($event);
+                (LaravelEventStore::$onFinish)($event);
             }, 'report');
     }
 
     private function processVolatileStream($eventStore, string $stream): void
     {
-        $onStart = LaravelEventStore::$onStart;
-        $onSuccess = LaravelEventStore::$onSuccess;
-        $onError = LaravelEventStore::$onError;
-        $onFinish = LaravelEventStore::$onFinish;
-
         $eventStore
             ->volatileSubscription($stream)
-            ->subscribe(function (EventRecord $event) use ($onStart, $onSuccess, $onError, $onFinish) {
-                $onStart($event);
+            ->subscribe(function (EventRecord $event) {
+                (LaravelEventStore::$onStart)($event);
                 try {
                     $this->dispatch($event);
-                    $onSuccess($event);
+                    (LaravelEventStore::$onSuccess)($event);
                 } catch (\Exception $e) {
-                    $this->dumpEvent($event);
-                    $onError($e, $event);
-                    report($e);
+                    (LaravelEventStore::$onError)($e, $event);
                 }
-                $onFinish($event);
+                (LaravelEventStore::$onFinish)($event);
             }, 'report');
-    }
-
-    protected function dumpEvent(EventRecord $event)
-    {
-        dump([
-            'id' => $event->getId(),
-            'number' => $event->getNumber(),
-            'stream' => $event->getStreamId(),
-            'type' => $event->getType(),
-            'created' => $event->getCreated(),
-            'data' => $event->getData(),
-            'metadata' => $this->safeGetMetadata($event),
-        ]);
-    }
-
-    protected function safeGetMetadata(EventRecord $event)
-    {
-        try {
-            return $event->getMetadata();
-        } catch (TypeError $e) {
-            return [];
-        }
     }
 
     public function dispatch(EventRecord $eventRecord): void
     {
-        $logger = LaravelEventStore::$logger;
         $serializedEvent = $payload = $this->makeSerializableEvent($eventRecord);
         $event = $serializedEvent->getType();
 
@@ -155,7 +116,7 @@ class EventStoreWorker extends Command
             $payload = null;
         }
 
-        $logger($serializedEvent, $event);
+        (LaravelEventStore::$logger)($serializedEvent, $event);
         event($event, $payload);
     }
 
@@ -168,9 +129,8 @@ class EventStoreWorker extends Command
         $data->setEventNumber($event->getNumber());
         $data->setData(json_encode($event->getData()));
         $data->setEventStreamId($event->getStreamId());
-        $data->setMetadata(json_encode($this->safeGetMetadata($event)));
+        $data->setMetadata(json_encode(LaravelEventStore::safeGetMetaData($event)));
         $data->setCreatedEpoch($event->getCreated()->getTimestamp() * 1000);
-
 
         return new JsonEventRecord($data);
     }

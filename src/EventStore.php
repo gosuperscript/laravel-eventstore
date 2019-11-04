@@ -2,8 +2,10 @@
 
 namespace DigitalRisks\LaravelEventStore;
 
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
+use Rxnet\EventStore\Record\EventRecord;
+use TypeError;
 
 class EventStore
 {
@@ -126,7 +128,18 @@ class EventStore
     public static function onError(?callable $callback = null)
     {
         $callback = $callback ?: function ($e, $event) {
-            return;
+            $data = [
+                'id' => $event->getId(),
+                'number' => $event->getNumber(),
+                'stream' => $event->getStreamId(),
+                'type' => $event->getType(),
+                'created' => $event->getCreated(),
+                'data' => $event->getData(),
+                'metadata' => self::safeGetMetaData($event),
+            ];
+
+            dump($data);
+            report($e);
         };
 
         static::$onError = $callback;
@@ -145,5 +158,14 @@ class EventStore
         };
 
         static::$onFinish = $callback;
+    }
+
+    public static function safeGetMetaData(EventRecord $event)
+    {
+        try {
+            return $event->getMetadata();
+        } catch (TypeError $e) {
+            return [];
+        }
     }
 }
