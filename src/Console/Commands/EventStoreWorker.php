@@ -120,7 +120,7 @@ class EventStoreWorker extends Command
     protected function safeGetMetadata(EventRecord $event)
     {
         try {
-            return $event->getMetadata();
+            return $event->getMetadata() ?? [];
         } catch (TypeError $e) {
             return [];
         }
@@ -150,7 +150,7 @@ class EventStoreWorker extends Command
         $data->setEventNumber($event->getNumber());
         $data->setData(json_encode($event->getData()));
         $data->setEventStreamId($event->getStreamId());
-        $data->setMetadata(json_encode($this->safeGetMetadata($event) ?? []));
+        $data->setMetadata(json_encode($this->safeGetMetadata($event)));
         $data->setCreatedEpoch($event->getCreated()->getTimestamp() * 1000);
 
 
