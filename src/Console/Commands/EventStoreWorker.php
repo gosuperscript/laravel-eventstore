@@ -135,8 +135,7 @@ class EventStoreWorker extends Command
     {
         try {
             return $event->getMetadata();
-        }
-        catch (TypeError $e) {
+        } catch (TypeError $e) {
             return [];
         }
     }
@@ -147,8 +146,7 @@ class EventStoreWorker extends Command
 
         if ($localEvent = $this->mapToLocalEvent($event)) {
             event($localEvent);
-        }
-        else {
+        } else {
             event($event->getType(), $event);
         }
     }
@@ -160,7 +158,7 @@ class EventStoreWorker extends Command
         $data->setEventType($event->getType());
         $data->setCreatedEpoch($event->getCreated()->getTimestamp() * 1000);
         $data->setData(json_encode($event->getData()));
-        $data->setMetadata(json_encode($this->safeGetMetadata($event)));
+        $data->setMetadata(json_encode($this->safeGetMetadata($event) ?? []));
 
         return new JsonEventRecord($data);
     }
@@ -170,11 +168,15 @@ class EventStoreWorker extends Command
         $eventToClass = config('eventstore.event_to_class');
         $className = $eventToClass ? $eventToClass($event) : 'App\Events\\' . $event->getType();
 
-        if (! class_exists($className)) return;
+        if (! class_exists($className)) {
+            return;
+        }
 
         $reflection = new ReflectionClass($className);
 
-        if (! $reflection->implementsInterface(CouldBeReceived::class)) return;
+        if (! $reflection->implementsInterface(CouldBeReceived::class)) {
+            return;
+        }
 
         $localEvent = new $className();
         $props = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
