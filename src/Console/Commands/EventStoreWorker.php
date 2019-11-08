@@ -120,7 +120,7 @@ class EventStoreWorker extends Command
     protected function safeGetMetadata(EventRecord $event)
     {
         try {
-            return $event->getMetadata();
+            return $event->getMetadata() ?? [];
         } catch (TypeError $e) {
             return [];
         }
