@@ -13,4 +13,4 @@ script:
 
 deploy:
   provider: script
-  script: npx semantic-release
+  script: npx semantic-release@15.13.27
