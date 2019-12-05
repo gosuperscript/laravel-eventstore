@@ -2,6 +2,9 @@ name: Test
 
 on: [push]
 
+env:
+  EVENTSTORE_HTTP_URL: ${{ secrets.EVENTSTORE_HTTP_URL }}
+
 jobs:
   build:
 
