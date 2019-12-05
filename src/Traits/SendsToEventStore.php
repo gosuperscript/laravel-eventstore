@@ -6,6 +6,7 @@ use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use ReflectionClass;
 use ReflectionProperty;
+use Illuminate\Contracts\Support\Arrayable;
 
 trait SendsToEventStore
 {
