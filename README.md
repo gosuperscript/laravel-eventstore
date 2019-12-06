@@ -215,6 +215,8 @@ class AccountCreatedTest extends TestCase
 }
 ```
 
+
+
 ## Usage - Receiving Events
 
 You must first run the worker which will listen for events. 
@@ -257,6 +259,7 @@ class SendAccountCreatedEmail
 {
     public function handle(AccountCreated $event)
     {
+        // Side effect, let's only send an email when we've triggered this event and not when replaying events
         if (! $event->getEventRecord()) return;
 
         Mail::to($event->email)->send('Here is your account');
@@ -267,12 +270,17 @@ class SaveAccountToDatabase
 {
     public function handle(AccountCreated $event)
     {
+        // State change, let's ensure we update our database with this event.
         if ($event->getEventRecord()) return;
 
         Account::create(['email' => $event->email]);
     }
 }
 ```
+
+In addition, if you would like to test that are events are created AND how the application reacts to those events
+you may set `eventstore.connection` to `sync`. This will trick the event listeners into thinking that the
+event has been received from the eventstore.
 
 ### Testing
 
@@ -296,6 +304,8 @@ class QuoteStartedTest extends TestCase
     }
 }
 ```
+
+In addition you may set set `eventstore.connection` to `sync`, which will trick your listeners 
 
 ## Configuration
 
