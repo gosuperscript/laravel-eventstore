@@ -4,7 +4,8 @@ on: [push]
 
 env:
   EVENTSTORE_HTTP_URL: ${{ secrets.EVENTSTORE_HTTP_URL }}
-
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
 jobs:
   build:
 
