@@ -2,7 +2,7 @@
 
 namespace DigitalRisks\LaravelEventStore\Tests;
 
-use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreWorker;
+use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreWorkerThread;
 use DigitalRisks\LaravelEventStore\EventStore;
 use DigitalRisks\LaravelEventStore\Tests\Fixtures\TestEvent;
 use DigitalRisks\LaravelEventStore\Tests\Traits\InteractsWithEventStore;
@@ -18,7 +18,7 @@ class WorkerTest extends TestCase
     {
         // Arrange.
         Event::fake();
-        $worker = resolve(EventStoreWorker::class);
+        $worker = resolve(EventStoreWorkerThread::class);
         $event = $this->makeEventRecord('event_with_no_class', ['hello' => 'world']);
 
         // Act.
@@ -36,7 +36,7 @@ class WorkerTest extends TestCase
     {
         // Arrange.
         Event::fake();
-        $worker = resolve(EventStoreWorker::class);
+        $worker = resolve(EventStoreWorkerThread::class);
         $event = $this->makeEventRecord('test_event', ['hello' => 'world']);
 
         EventStore::eventToClass(function ($event) {
@@ -58,7 +58,7 @@ class WorkerTest extends TestCase
     {
         // Arrange.
         Event::fake();
-        $worker = resolve(EventStoreWorker::class);
+        $worker = resolve(EventStoreWorkerThread::class);
         $event = $this->makeEventRecord('test_event', ['hello' => 'world'], null);
 
         // Act.
