@@ -23,6 +23,15 @@ class EventStoreWorkerThread extends Command
 
     protected $description = 'Worker handling incoming event streams from ES';
 
+    private $loop;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->loop = EventLoop::getLoop();
+    }
+
     public function handle(): void
     {
         if (!$this->option('stream')) {
@@ -30,10 +39,20 @@ class EventStoreWorkerThread extends Command
             return;
         }
 
-        $this->processStream();
+        $this->loop->stop();
+        try {
+            $this->processAllStreams();
+            $this->loop->run();
+        } catch (\Exception $e) {
+            report($e);
+        }
 
-        \EventLoop\EventLoop::getLoop()->run();
+        $this->error('Lost connection with EventStore - reconnecting');
+        usleep(1000);
+
+        $this->handle();
     }
+
     private function connect($callback): void
     {
         $eventStore = new EventStore();
