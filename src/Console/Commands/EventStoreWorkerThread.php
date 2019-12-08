@@ -41,7 +41,7 @@ class EventStoreWorkerThread extends Command
 
         $this->loop->stop();
         try {
-            $this->processAllStreams();
+            $this->processStream();
             $this->loop->run();
         } catch (\Exception $e) {
             report($e);
