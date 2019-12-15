@@ -1,6 +1,7 @@
 <?php
 
 namespace DigitalRisks\LaravelEventStore\Console\Commands;
+
 use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
 use DigitalRisks\LaravelEventStore\EventStore as LaravelEventStore;
 use EventLoop\EventLoop;
@@ -48,7 +49,7 @@ class EventStoreWorkerThread extends Command
         }
 
         $this->error('Lost connection with EventStore - reconnecting');
-        usleep(1000);
+        sleep(1);
 
         $this->handle();
     }
@@ -59,17 +60,19 @@ class EventStoreWorkerThread extends Command
         $eventStore->connect(config('eventstore.tcp_url'))
             ->subscribe(function () use ($callback, $eventStore) {
                 $callback($eventStore);
-        }, 'report');
+            }, 'report');
     }
 
     private function processStream(): void
     {
-        $this->connect(function($eventStore){
-            if ($this->option('type') == 'volatile')
+        $this->connect(function ($eventStore) {
+            if ($this->option('type') == 'volatile') {
                 $this->processVolatileStream($eventStore, $this->option('stream'));
+            }
 
-            if ($this->option('type') == 'persistent')
+            if ($this->option('type') == 'persistent') {
                 $this->processPersistentStream($eventStore, $this->option('stream'));
+            }
         });
     }
 

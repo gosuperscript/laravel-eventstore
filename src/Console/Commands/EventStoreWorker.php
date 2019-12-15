@@ -1,6 +1,7 @@
 <?php
 
 namespace DigitalRisks\LaravelEventStore\Console\Commands;
+
 use Illuminate\Console\Command;
 use Symfony\Component\Process\Process;
 
@@ -11,39 +12,60 @@ class EventStoreWorker extends Command
 
     protected $description = 'Worker handling running stream processes';
 
+    protected function spawnProcess($stream, $type = 'persistent')
+    {
+        if (empty($stream)) {
+            return null;
+        }
+
+        $command = "php artisan eventstore:worker-thread --stream={$stream} --type={$type} --parallel={$this->option('parallel')}";
+        $process = Process::fromShellCommandline($command);
+        $process->start();
+
+        return $process;
+    }
+
     public function handle(): void
     {
-        $processes = [];
+        $entries = [];
 
         foreach (config('eventstore.subscription_streams') as $stream) {
-            if (empty($stream))
-                continue;
-
-            $command = "php artisan eventstore:worker-thread --stream={$stream} --type=persistent --parallel={$this->option('parallel')}";
-            $process = Process::fromShellCommandline($command);
-            $process->start();
-
-            $processes[] = $process;
+            if (($process = $this->spawnProcess($stream, 'persistent')) !== null) {
+                $entries[] = [
+                    'process' => $process,
+                    'stream' => $stream,
+                    'type' => 'persistent'
+                ];
+            }
         }
 
         foreach (config('eventstore.volatile_streams') as $stream) {
-            if (empty($stream))
-                continue;
-
-            $command = "php artisan eventstore:worker-thread --stream={$stream} --type=volatile --parallel={$this->option('parallel')}";
-            $process = Process::fromShellCommandline($command);
-            $process->start();
-
-            $processes[] = $process;
+            if (($process = $this->spawnProcess($stream, 'volatile')) !== null) {
+                $entries[] = [
+                    'process' => $process,
+                    'stream' => $stream,
+                    'type' => 'volatile'
+                ];
+            }
         }
 
-        while(true) {
-            foreach($processes as $process)
-                if (!$process->isRunning()) {
-                    throw new \Exception("Process {$process->getCommandLine()} stopped running");
-                }
+        while (true) {
+            foreach ($entries as $key => $entry) {
+                if (!$entry['process']->isRunning()) {
+                    $this->info("Process {$key} {$entry['process']->getCommandLine()} stopped running - restarting");
+                    unset($entries[$key]);
 
-            usleep(1000);
+                    if (($process = $this->spawnProcess($entry['stream'], $entry['type'])) !== null) {
+                        $entries[] = [
+                            'process' => $process,
+                            'stream' => $entry['stream'],
+                            'type' => $entry['type']
+                        ];
+                    }
+                }
+            }
+
+            sleep(1);
         }
     }
 }
