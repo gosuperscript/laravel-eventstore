@@ -75,10 +75,13 @@ class EventStore
             if (empty($channels['stdout'])) {
                 $channels['stdout'] = [
                     'driver' => 'monolog',
-                    'handler' => 'Monolog\Handler\StreamHandler',
-                    'formatter' => null,
+                    'handler' => \Monolog\Handler\StreamHandler::class,
+                    'formatter' => \Monolog\Formatter\LineFormatter::class,
+                    'formatter_with' => [
+                        'format' => "%message%",
+                    ],
                     'with' => [
-                        'stream' => 'php://stdout'
+                        'stream' => 'php://stdout',
                     ]
                 ];
 
