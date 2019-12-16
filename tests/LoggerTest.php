@@ -24,9 +24,9 @@ class LoggerTest extends TestCase
         $worker->dispatch($event);
 
         // Assert.
-        Log::assertLogged('info', function ($message) {
+        Log::assertLogged('info', function ($message, $context) {
             $this->assertStringContainsString("/streams/test-stream/0", $message);
-            $this->assertStringContainsString(json_encode(['type' => 'test_event', 'hasListeners' => false]), $message);
+            $this->assertEquals(['type' => 'test_event', 'hasListeners' => false], $context);
 
             return true;
         });
@@ -46,9 +46,9 @@ class LoggerTest extends TestCase
         $worker->dispatch($event);
 
         // Assert.
-        Log::assertLogged('info', function ($message) {
+        Log::assertLogged('info', function ($message, $context) {
             $this->assertStringContainsString("/streams/test-stream/0", $message);
-            $this->assertStringContainsString(json_encode(['type' => 'test_event', 'hasListeners' => true]), $message);
+            $this->assertEquals(['type' => 'test_event', 'hasListeners' => true], $context);
 
             return true;
         });

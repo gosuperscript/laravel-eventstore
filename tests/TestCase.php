@@ -12,7 +12,7 @@ class TestCase extends Orchestra
     protected function getPackageProviders($app)
     {
         EventStore::eventToClass();
-        EventStore::threadLogger(function($message){ return Log::info($message); });
+        EventStore::threadLogger(function($message, $context){ return Log::info($message, $context); });
 
         return [
             ServiceProvider::class,

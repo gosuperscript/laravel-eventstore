@@ -51,8 +51,8 @@ class EventStore
      */
     public static function workerLogger(?callable $logger = null)
     {
-        static::$workerLogger = $logger ?: function($message){
-            Log::info($message);
+        static::$workerLogger = $logger ?: function($message, $context){
+            Log::info($message, $context);
         };
     }
 
@@ -64,8 +64,8 @@ class EventStore
      */
     public static function threadLogger(?callable $logger = null)
     {
-        static::$threadLogger = $logger ?: function($message){
-            Log::channel('stdout')->info($message);
+        static::$threadLogger = $logger ?: function($message, $context){
+            Log::channel('stdout')->info($message, $context);
         };
 
         // setup stdout channel
@@ -78,7 +78,7 @@ class EventStore
                     'handler' => \Monolog\Handler\StreamHandler::class,
                     'formatter' => \Monolog\Formatter\LineFormatter::class,
                     'formatter_with' => [
-                        'format' => "%message%",
+                        'format' => "%message% %context%",
                     ],
                     'with' => [
                         'stream' => 'php://stdout',

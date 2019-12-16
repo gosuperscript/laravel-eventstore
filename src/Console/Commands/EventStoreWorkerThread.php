@@ -129,11 +129,11 @@ class EventStoreWorkerThread extends Command
         $type = $serializedEvent->getType();
         $stream = $serializedEvent->getStreamId();
         $number = $serializedEvent->getNumber();
+
         $hasListener = Event::hasListeners($type);
+        $metadata = ['type' => $event, 'hasListeners' => $hasListener];
 
-        $metadata = json_encode(['type' => $event, 'hasListeners' => $hasListener]);
-
-        (LaravelEventStore::$threadLogger)("{$url}/streams/{$stream}/{$number} {$metadata}");
+        (LaravelEventStore::$threadLogger)("{$url}/streams/{$stream}/{$number}", $metadata);
         event($event, $payload);
     }
 
