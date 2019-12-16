@@ -17,11 +17,9 @@ use TypeError;
 
 class EventStoreWorkerThread extends Command
 {
-    // parallel > 1 can cause duplicate events
     protected $signature = 'eventstore:worker-thread
         {--stream= : Name of the stream to run on}
-        {--type=persistent : Type of stream (persistent / volatile)}
-        {--parallel=10 : How many events to run in parallel.}';
+        {--type=persistent : Type of stream (persistent / volatile)}';
 
     protected $description = 'Worker handling incoming event streams from ES';
 
@@ -79,7 +77,7 @@ class EventStoreWorkerThread extends Command
 
     private function processPersistentStream(EventStore $eventStore, string $stream): void
     {
-        $eventStore->persistentSubscription($stream, config('eventstore.group'), $this->option('parallel') ?? 1)
+        $eventStore->persistentSubscription($stream, config('eventstore.group'))
             ->subscribe(function (AcknowledgeableEventRecord $event) {
                 try {
                     $this->dispatch($event);

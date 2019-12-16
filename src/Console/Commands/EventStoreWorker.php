@@ -7,9 +7,7 @@ use Symfony\Component\Process\Process;
 
 class EventStoreWorker extends Command
 {
-    // parallel > 1 can cause duplicate events
-    protected $signature = 'eventstore:worker
-        {--parallel=1 : How many events to run in parallel.}';
+    protected $signature = 'eventstore:worker';
 
     protected $description = 'Worker handling running stream processes';
 
@@ -19,7 +17,7 @@ class EventStoreWorker extends Command
             return null;
         }
 
-        $command = "php artisan eventstore:worker-thread --stream={$stream} --type={$type} --parallel={$this->option('parallel')}";
+        $command = "php artisan eventstore:worker-thread --stream={$stream} --type={$type}";
         $process = Process::fromShellCommandline($command);
         $process->start();
 
