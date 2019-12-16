@@ -7,8 +7,9 @@ use Symfony\Component\Process\Process;
 
 class EventStoreWorker extends Command
 {
+    // parallel > 1 can cause duplicate events
     protected $signature = 'eventstore:worker
-        {--parallel=10 : How many events to run in parallel.}';
+        {--parallel=1 : How many events to run in parallel.}';
 
     protected $description = 'Worker handling running stream processes';
 

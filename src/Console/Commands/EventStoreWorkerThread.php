@@ -17,6 +17,7 @@ use TypeError;
 
 class EventStoreWorkerThread extends Command
 {
+    // parallel > 1 can cause duplicate events
     protected $signature = 'eventstore:worker-thread
         {--stream= : Name of the stream to run on}
         {--type=persistent : Type of stream (persistent / volatile)}
