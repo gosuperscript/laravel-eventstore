@@ -2,9 +2,7 @@
 
 namespace DigitalRisks\LaravelEventStore\Tests;
 
-use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreWorker;
-use DigitalRisks\LaravelEventStore\EventStore;
-use DigitalRisks\LaravelEventStore\Tests\Fixtures\TestEvent;
+use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreWorkerThread;
 use DigitalRisks\LaravelEventStore\Tests\Traits\MakesEventRecords;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
@@ -19,7 +17,7 @@ class LoggerTest extends TestCase
         // Arrange.
         Log::swap(new LogFake);
 
-        $worker = resolve(EventStoreWorker::class);
+        $worker = resolve(EventStoreWorkerThread::class);
         $event = $this->makeEventRecord('test_event', ['hello' => 'world']);
 
         // Act.
@@ -39,7 +37,7 @@ class LoggerTest extends TestCase
         // Arrange.
         Log::swap(new LogFake);
 
-        $worker = resolve(EventStoreWorker::class);
+        $worker = resolve(EventStoreWorkerThread::class);
         $event = $this->makeEventRecord('test_event', ['hello' => 'world']);
         Event::listen('test_event', function () {
         });
