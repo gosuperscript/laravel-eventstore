@@ -3,6 +3,7 @@
 namespace DigitalRisks\LaravelEventStore;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 
 class EventStore
 {
@@ -18,9 +19,14 @@ class EventStore
      *
      * @var callable
      */
-    public static $infoLogger;
+    public static $workerLogger;
 
-    public static $errorLogger;
+    /**
+     * Variable for logger.
+     *
+     * @var callable
+     */
+    public static $threadLogger;
 
     /**
      * Set the event class based on current event key.
@@ -43,17 +49,41 @@ class EventStore
      * @param callable $callback
      * @return void
      */
-    public static function logger(?callable $infoCallback = null, ?callable $errorCallback = null)
+    public static function workerLogger(?callable $logger = null)
     {
-        $infoCallback = $infoCallback ?: function($message){
-            return Log::info($message);
+        static::$workerLogger = $logger ?: function($message){
+            Log::info($message);
+        };
+    }
+
+    /**
+     * Set the logger environment.
+     *
+     * @param callable $callback
+     * @return void
+     */
+    public static function threadLogger(?callable $logger = null)
+    {
+        static::$threadLogger = $logger ?: function($message){
+            Log::channel('stdout')->info($message);
         };
 
-        $errorCallback = $errorCallback ?: function($message){
-            return Log::error($message);
-        };
+        // setup stdout channel
+        if (empty($logger)) {
+            $channels = Config::get('logging.channels');
 
-        static::$infoLogger = $infoCallback;
-        static::$errorLogger = $errorCallback;
+            if (empty($channels['stdout'])) {
+                $channels['stdout'] = [
+                    'driver' => 'monolog',
+                    'handler' => 'Monolog\Handler\StreamHandler',
+                    'formatter' => null,
+                    'with' => [
+                        'stream' => 'php://stdout'
+                    ]
+                ];
+
+                Config::set('logging.channels', $channels);
+            }
+        }
     }
 }

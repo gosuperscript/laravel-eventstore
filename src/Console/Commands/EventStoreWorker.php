@@ -3,7 +3,6 @@
 namespace DigitalRisks\LaravelEventStore\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\Process\Process;
 use DigitalRisks\LaravelEventStore\EventStore as LaravelEventStore;
 
@@ -71,18 +70,7 @@ class EventStoreWorker extends Command
                         $line = trim($line);
 
                         if (!empty($line)) {
-                            (LaravelEventStore::$infoLogger)($line);
-                        }
-                    }
-                }
-
-                $error = $entry['process']->getIncrementalErrorOutput();
-                if (!empty($error)) {
-                    foreach (explode(PHP_EOL, $error) as $line) {
-                        $line = trim($line);
-
-                        if (!empty($line)) {
-                            (LaravelEventStore::$errorLogger)($line);
+                            (LaravelEventStore::$workerLogger)($line);
                         }
                     }
                 }

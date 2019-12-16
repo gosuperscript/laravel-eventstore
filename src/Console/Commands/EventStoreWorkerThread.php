@@ -36,7 +36,7 @@ class EventStoreWorkerThread extends Command
     public function handle(): void
     {
         if (!$this->option('stream')) {
-            $this->info("Stream option is required");
+            report("Stream option is required");
             return;
         }
 
@@ -48,7 +48,7 @@ class EventStoreWorkerThread extends Command
             report($e);
         }
 
-        $this->error('Lost connection with EventStore - reconnecting');
+        report('Lost connection with EventStore - reconnecting');
         sleep(1);
 
         $this->handle();
@@ -133,7 +133,7 @@ class EventStoreWorkerThread extends Command
 
         $metadata = json_encode(['type' => $event, 'hasListeners' => $hasListener]);
 
-        $this->info("{$url}/streams/{$stream}/{$number} {$metadata}");
+        (LaravelEventStore::$threadLogger)("{$url}/streams/{$stream}/{$number} {$metadata}");
         event($event, $payload);
     }
 
