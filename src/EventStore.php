@@ -3,7 +3,6 @@
 namespace DigitalRisks\LaravelEventStore;
 
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Event;
 
 class EventStore
 {
@@ -19,7 +18,9 @@ class EventStore
      *
      * @var callable
      */
-    public static $logger;
+    public static $infoLogger;
+
+    public static $errorLogger;
 
     /**
      * Set the event class based on current event key.
@@ -42,19 +43,17 @@ class EventStore
      * @param callable $callback
      * @return void
      */
-    public static function logger(?callable $callback = null)
+    public static function logger(?callable $infoCallback = null, ?callable $errorCallback = null)
     {
-        $callback = $callback ?: function ($event, $type) {
-            $url = parse_url(config('eventstore.http_url'));
-            $url = "{$url['scheme']}://{$url['host']}:{$url['port']}/web/index.html#";
-            $type = $event->getType();
-            $stream = $event->getStreamId();
-            $number = $event->getNumber();
-            $hasListener = Event::hasListeners($type);
-
-            Log::info("{$url}/streams/{$stream}/{$number}", ['type' => $type, 'hasListeners' => $hasListener]);
+        $infoCallback = $infoCallback ?: function($message){
+            return Log::info($message);
         };
 
-        static::$logger = $callback;
+        $errorCallback = $errorCallback ?: function($message){
+            return Log::error($message);
+        };
+
+        static::$infoLogger = $infoCallback;
+        static::$errorLogger = $errorCallback;
     }
 }
