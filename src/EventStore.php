@@ -3,7 +3,7 @@
 namespace DigitalRisks\LaravelEventStore;
 
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Config;
 
 class EventStore
 {
@@ -19,7 +19,14 @@ class EventStore
      *
      * @var callable
      */
-    public static $logger;
+    public static $workerLogger;
+
+    /**
+     * Variable for logger.
+     *
+     * @var callable
+     */
+    public static $threadLogger;
 
     /**
      * Set the event class based on current event key.
@@ -42,19 +49,44 @@ class EventStore
      * @param callable $callback
      * @return void
      */
-    public static function logger(?callable $callback = null)
+    public static function workerLogger(?callable $logger = null)
     {
-        $callback = $callback ?: function ($event, $type) {
-            $url = parse_url(config('eventstore.http_url'));
-            $url = "{$url['scheme']}://{$url['host']}:{$url['port']}/web/index.html#";
-            $type = $event->getType();
-            $stream = $event->getStreamId();
-            $number = $event->getNumber();
-            $hasListener = Event::hasListeners($type);
+        static::$workerLogger = $logger ?: function($message, $context){
+            Log::info($message, $context);
+        };
+    }
 
-            Log::info("{$url}/streams/{$stream}/{$number}", ['type' => $type, 'hasListeners' => $hasListener]);
+    /**
+     * Set the logger environment.
+     *
+     * @param callable $callback
+     * @return void
+     */
+    public static function threadLogger(?callable $logger = null)
+    {
+        static::$threadLogger = $logger ?: function($message, $context){
+            Log::channel('stdout')->info($message, $context);
         };
 
-        static::$logger = $callback;
+        // setup stdout channel
+        if (empty($logger)) {
+            $channels = Config::get('logging.channels');
+
+            if (empty($channels['stdout'])) {
+                $channels['stdout'] = [
+                    'driver' => 'monolog',
+                    'handler' => \Monolog\Handler\StreamHandler::class,
+                    'formatter' => \Monolog\Formatter\LineFormatter::class,
+                    'formatter_with' => [
+                        'format' => "%message% %context%",
+                    ],
+                    'with' => [
+                        'stream' => 'php://stdout',
+                    ]
+                ];
+
+                Config::set('logging.channels', $channels);
+            }
+        }
     }
 }

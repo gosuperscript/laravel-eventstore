@@ -4,6 +4,7 @@ namespace DigitalRisks\LaravelEventStore\Console\Commands;
 
 use Illuminate\Console\Command;
 use Symfony\Component\Process\Process;
+use DigitalRisks\LaravelEventStore\EventStore as LaravelEventStore;
 
 class EventStoreWorker extends Command
 {
@@ -60,6 +61,17 @@ class EventStoreWorker extends Command
                             'stream' => $entry['stream'],
                             'type' => $entry['type']
                         ];
+                    }
+                }
+
+                $output = $entry['process']->getIncrementalOutput();
+                if (!empty($output)) {
+                    foreach (explode(PHP_EOL, $output) as $line) {
+                        $line = trim($line);
+
+                        if (!empty($line)) {
+                            (LaravelEventStore::$workerLogger)($line);
+                        }
                     }
                 }
             }

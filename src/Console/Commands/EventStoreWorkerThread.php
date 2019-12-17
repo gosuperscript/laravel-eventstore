@@ -14,6 +14,7 @@ use Rxnet\EventStore\Record\AcknowledgeableEventRecord;
 use Rxnet\EventStore\Record\EventRecord;
 use Rxnet\EventStore\Record\JsonEventRecord;
 use TypeError;
+use Illuminate\Support\Facades\Event;
 
 class EventStoreWorkerThread extends Command
 {
@@ -35,7 +36,7 @@ class EventStoreWorkerThread extends Command
     public function handle(): void
     {
         if (!$this->option('stream')) {
-            $this->info("Stream option is required");
+            report(new \Exception('Stream option is required'));
             return;
         }
 
@@ -47,7 +48,7 @@ class EventStoreWorkerThread extends Command
             report($e);
         }
 
-        $this->error('Lost connection with EventStore - reconnecting');
+        report(new \Exception('Lost connection with EventStore - reconnecting'));
         sleep(1);
 
         $this->handle();
@@ -115,7 +116,6 @@ class EventStoreWorkerThread extends Command
 
     public function dispatch(EventRecord $eventRecord): void
     {
-        $logger = LaravelEventStore::$logger;
         $serializedEvent = $payload = $this->makeSerializableEvent($eventRecord);
         $event = $serializedEvent->getType();
 
@@ -124,7 +124,16 @@ class EventStoreWorkerThread extends Command
             $payload = null;
         }
 
-        $logger($serializedEvent, $event);
+        $url = parse_url(config('eventstore.http_url'));
+        $url = "{$url['scheme']}://{$url['host']}:{$url['port']}/web/index.html#";
+        $type = $serializedEvent->getType();
+        $stream = $serializedEvent->getStreamId();
+        $number = $serializedEvent->getNumber();
+
+        $hasListener = Event::hasListeners($type);
+        $metadata = ['type' => $event, 'hasListeners' => $hasListener];
+
+        (LaravelEventStore::$threadLogger)("{$url}/streams/{$stream}/{$number}", $metadata);
         event($event, $payload);
     }
 

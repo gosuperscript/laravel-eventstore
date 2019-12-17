@@ -31,7 +31,8 @@ class ServiceProvider extends LaravelServiceProvider
         }
 
         $this->eventClasses();
-        $this->logger();
+        $this->threadLogger();
+        $this->workerLogger();
 
         Event::listen(ShouldBeStored::class, SendToEventStoreListener::class);
     }
@@ -41,9 +42,10 @@ class ServiceProvider extends LaravelServiceProvider
      *
      * @return void
      */
-    public function eventClasses()
+    public function eventClasses(?callable $callback = null)
     {
-        EventStore::eventToClass();
+        if (empty(EventStore::$eventToClass))
+            EventStore::eventToClass($callback);
     }
 
     /**
@@ -51,9 +53,21 @@ class ServiceProvider extends LaravelServiceProvider
      *
      * @return void
      */
-    public function logger()
+    public function threadLogger(?callable $logger = null)
     {
-        EventStore::logger();
+        if (empty(EventStore::$threadLogger))
+            EventStore::threadLogger($logger);
+    }
+
+    /**
+     * Handle logging when event is triggered.
+     *
+     * @return void
+     */
+    public function workerLogger(?callable $logger = null)
+    {
+        if (empty(EventStore::$workerLogger))
+            EventStore::workerLogger($logger);
     }
 
     /**
