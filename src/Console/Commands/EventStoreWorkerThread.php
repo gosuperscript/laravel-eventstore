@@ -36,7 +36,7 @@ class EventStoreWorkerThread extends Command
     public function handle(): void
     {
         if (!$this->option('stream')) {
-            report("Stream option is required");
+            report(new \Exception('Stream option is required'));
             return;
         }
 
@@ -48,7 +48,7 @@ class EventStoreWorkerThread extends Command
             report($e);
         }
 
-        report('Lost connection with EventStore - reconnecting');
+        report(new \Exception('Lost connection with EventStore - reconnecting'));
         sleep(1);
 
         $this->handle();
