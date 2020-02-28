@@ -89,7 +89,7 @@ class EventStoreWorkerThread extends Command
 
                     return $event->nack($event::NACK_ACTION_PARK);
                 }
-            });
+            }, 'report');
     }
 
     private function processVolatileStream(EventStore $eventStore, string $stream): void
