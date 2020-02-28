@@ -99,7 +99,6 @@ class EventStoreWorkerThread extends Command
                 try {
                     $this->dispatch($event);
                 } catch (\Exception $e) {
-                    $this->dumpEvent($event);
                     report($e);
                 }
             }, 'report');
