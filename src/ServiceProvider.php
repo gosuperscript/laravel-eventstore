@@ -42,10 +42,10 @@ class ServiceProvider extends LaravelServiceProvider
      *
      * @return void
      */
-    public function eventClasses(?callable $callback = null)
+    public function eventClasses()
     {
         if (empty(EventStore::$eventToClass))
-            EventStore::eventToClass($callback);
+            EventStore::eventToClass();
     }
 
     /**
@@ -53,10 +53,10 @@ class ServiceProvider extends LaravelServiceProvider
      *
      * @return void
      */
-    public function threadLogger(?callable $logger = null)
+    public function threadLogger()
     {
         if (empty(EventStore::$threadLogger))
-            EventStore::threadLogger($logger);
+            EventStore::threadLogger();
     }
 
     /**
@@ -64,10 +64,10 @@ class ServiceProvider extends LaravelServiceProvider
      *
      * @return void
      */
-    public function workerLogger(?callable $logger = null)
+    public function workerLogger()
     {
         if (empty(EventStore::$workerLogger))
-            EventStore::workerLogger($logger);
+            EventStore::workerLogger();
     }
 
     /**
