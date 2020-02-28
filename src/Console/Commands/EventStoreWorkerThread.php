@@ -116,22 +116,26 @@ class EventStoreWorkerThread extends Command
 
     public function dispatch(EventRecord $eventRecord): void
     {
-        $serializedEvent = $payload = $this->makeSerializableEvent($eventRecord);
-        $event = $serializedEvent->getType();
+        $serializedEvent = $this->makeSerializableEvent($eventRecord);
 
-        if ($localEvent = $this->mapToLocalEvent($serializedEvent)) {
-            $event = $localEvent;
-            $payload = null;
-        }
-
-        $url = parse_url(config('eventstore.http_url'));
-        $url = "{$url['scheme']}://{$url['host']}:{$url['port']}/web/index.html#";
         $type = $serializedEvent->getType();
         $stream = $serializedEvent->getStreamId();
         $number = $serializedEvent->getNumber();
 
+        if ($localEvent = $this->mapToLocalEvent($serializedEvent)) {
+            $event = $localEvent;
+            $payload = null;
+        } else {
+            $event = $type;
+            $payload = $serializedEvent;
+        }
+
+        $url = parse_url(config('eventstore.http_url'));
+        $url = "{$url['scheme']}://{$url['host']}:{$url['port']}/web/index.html#";
+
+
         $hasListener = Event::hasListeners($type);
-        $metadata = ['type' => $event, 'hasListeners' => $hasListener];
+        $metadata = ['type' => $type, 'hasListeners' => $hasListener];
 
         (LaravelEventStore::$threadLogger)("{$url}/streams/{$stream}/{$number}", $metadata);
         event($event, $payload);
