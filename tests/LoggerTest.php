@@ -3,14 +3,14 @@
 namespace DigitalRisks\LaravelEventStore\Tests;
 
 use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreWorkerThread;
-use DigitalRisks\LaravelEventStore\Tests\Traits\MakesEventRecords;
+use DigitalRisks\LaravelEventStore\TestUtils\Traits\MakesEventRecords as TraitsMakesEventRecords;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use TiMacDonald\Log\LogFake;
 
 class LoggerTest extends TestCase
 {
-    use MakesEventRecords;
+    use TraitsMakesEventRecords;
 
     public function test_it_logs_an_event()
     {

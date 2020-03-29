@@ -3,7 +3,7 @@
 namespace DigitalRisks\LaravelEventStore\Tests;
 
 use DigitalRisks\LaravelEventStore\Contracts\ShouldBeStored;
-use DigitalRisks\LaravelEventStore\Tests\Traits\InteractsWithEventStore;
+use DigitalRisks\LaravelEventStore\TestUtils\Traits\InteractsWithEventStore;
 use DigitalRisks\LaravelEventStore\Traits\SendsToEventStore;
 
 class SendsEventTest extends TestCase

@@ -1,6 +1,6 @@
 <?php
 
-namespace DigitalRisks\LaravelEventStore\Tests\Constraint;
+namespace DigitalRisks\LaravelEventStore\TestUtils\Constraint;
 
 use DigitalRisks\LaravelEventStore\Client;
 use GuzzleHttp\Exception\ClientException;

@@ -5,8 +5,8 @@ namespace DigitalRisks\LaravelEventStore\Tests;
 use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreWorkerThread;
 use DigitalRisks\LaravelEventStore\EventStore;
 use DigitalRisks\LaravelEventStore\Tests\Fixtures\TestEvent;
-use DigitalRisks\LaravelEventStore\Tests\Traits\InteractsWithEventStore;
-use DigitalRisks\LaravelEventStore\Tests\Traits\MakesEventRecords;
+use DigitalRisks\LaravelEventStore\TestUtils\Traits\InteractsWithEventStore;
+use DigitalRisks\LaravelEventStore\TestUtils\Traits\MakesEventRecords;
 use Illuminate\Support\Facades\Event;
 use Rxnet\EventStore\Record\EventRecord;
 

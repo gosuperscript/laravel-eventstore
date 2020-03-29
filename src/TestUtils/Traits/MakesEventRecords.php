@@ -1,6 +1,6 @@
 <?php
 
-namespace DigitalRisks\LaravelEventStore\Tests\Traits;
+namespace DigitalRisks\LaravelEventStore\TestUtils\Traits;
 
 use Illuminate\Support\Carbon;
 use Rxnet\EventStore\Data\EventRecord;

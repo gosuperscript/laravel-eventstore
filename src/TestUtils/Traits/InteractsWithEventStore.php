@@ -1,11 +1,11 @@
 <?php
 
-namespace DigitalRisks\LaravelEventStore\Tests\Traits;
+namespace DigitalRisks\LaravelEventStore\TestUtils\Traits;
 
 use DigitalRisks\LaravelEventStore\Client;
-use DigitalRisks\LaravelEventStore\Tests\Constraint\EventNotOnEventStoreConstraint;
-use DigitalRisks\LaravelEventStore\Tests\Constraint\EventOnEventStoreConstraint;
-use DigitalRisks\LaravelEventStore\Tests\Constraint\EventsOnEventStoreConstraint;
+use DigitalRisks\LaravelEventStore\TestUtils\Constraint\EventNotOnEventStoreConstraint;
+use DigitalRisks\LaravelEventStore\TestUtils\Constraint\EventOnEventStoreConstraint;
+use DigitalRisks\LaravelEventStore\TestUtils\Constraint\EventsOnEventStoreConstraint;
 
 trait InteractsWithEventStore
 {

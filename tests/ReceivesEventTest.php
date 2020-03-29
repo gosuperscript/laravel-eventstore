@@ -4,7 +4,7 @@ namespace DigitalRisks\LaravelEventStore\Tests;
 
 use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
 use DigitalRisks\LaravelEventStore\Contracts\ShouldBeStored;
-use DigitalRisks\LaravelEventStore\Tests\Traits\InteractsWithEventStore;
+use DigitalRisks\LaravelEventStore\TestUtils\Traits\InteractsWithEventStore;
 use DigitalRisks\LaravelEventStore\Traits\AddsLaravelMetadata;
 use DigitalRisks\LaravelEventStore\Traits\ReceivedFromEventStore;
 use DigitalRisks\LaravelEventStore\Traits\SendsToEventStore;
