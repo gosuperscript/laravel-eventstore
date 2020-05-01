@@ -24,7 +24,7 @@ class EventStoreReset extends Command
     {
         if (! $this->confirm('Please stop all workers first. Continue?')) return;
 
-        $this->call('migrate:fresh --seed');
+        $this->call('migrate:fresh', ['--seed' => true]);
 
         $streams = collect(config('eventstore.subscription_streams'));
 
