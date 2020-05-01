@@ -10,7 +10,7 @@ class EventStoreReset extends Command
 {
     protected $signature = 'eventstore:reset';
 
-    protected $description = 'Wipe the database and recreate the persistent subscriptions.';
+    protected $description = 'Wipe the database, seed and recreate the persistent subscriptions.';
     protected $client;
 
     public function __construct(Client $client)
@@ -24,7 +24,7 @@ class EventStoreReset extends Command
     {
         if (! $this->confirm('Please stop all workers first. Continue?')) return;
 
-        $this->call('migrate:fresh');
+        $this->call('migrate:fresh --seed');
 
         $streams = collect(config('eventstore.subscription_streams'));
 
