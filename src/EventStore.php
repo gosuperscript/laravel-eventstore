@@ -26,6 +26,13 @@ class EventStore
      *
      * @var callable
      */
+    public static $workerErrorLogger;
+
+    /**
+     * Variable for logger.
+     *
+     * @var callable
+     */
     public static $threadLogger;
 
     /**
@@ -51,8 +58,21 @@ class EventStore
      */
     public static function workerLogger(?callable $logger = null)
     {
-        static::$workerLogger = $logger ?: function($message, $context = []){
+        static::$workerLogger = $logger ?: function ($message, $context = []) {
             Log::info($message, $context);
+        };
+    }
+
+    /**
+     * Set the logger environment.
+     *
+     * @param callable $callback
+     * @return void
+     */
+    public static function workerErrorLogger(?callable $logger = null)
+    {
+        static::$workerErrorLogger = $logger ?: function ($message, $context = []) {
+            Log::error($message, $context);
         };
     }
 
@@ -64,7 +84,7 @@ class EventStore
      */
     public static function threadLogger(?callable $logger = null)
     {
-        static::$threadLogger = $logger ?: function($message, $context = []){
+        static::$threadLogger = $logger ?: function ($message, $context = []) {
             Log::channel('stdout')->info($message, $context);
         };
 
