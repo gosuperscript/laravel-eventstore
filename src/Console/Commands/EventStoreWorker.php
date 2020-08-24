@@ -74,6 +74,17 @@ class EventStoreWorker extends Command
                         }
                     }
                 }
+
+                $errorOutput = $entry['process']->getIncrementalErrorOutput();
+                if (!empty($errorOutput)) {
+                    foreach (explode(PHP_EOL, $errorOutput) as $line) {
+                        $line = trim($line);
+
+                        if (!empty($line)) {
+                            (LaravelEventStore::$workerErrorLogger)($line);
+                        }
+                    }
+                }
             }
 
             sleep(1);
