@@ -15,15 +15,21 @@
             "role": "Developer"
         }
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url":  "git@github.com:morrislaptop/eventstore-client.git"
+        }
+    ],
     "require": {
         "php": "^7.1",
         "guzzlehttp/guzzle": "^6.3 || ^7.0",
-        "illuminate/support": "5.7.* || 5.8.* || ^6.0 || ^7.0",
+        "illuminate/support": "5.7.* || 5.8.* || ^6.0 || ^7.0 || ^8.0",
         "ramsey/uuid": "^3.8 || ^4.0",
-        "rxnet/eventstore-client": "^3.0.2"
+        "rxnet/eventstore-client": "dev-ramsey-uuid-4"
     },
     "require-dev": {
-        "orchestra/testbench": "^5.1",
+        "orchestra/testbench": "^5.1 || ^6.9",
         "phpunit/phpunit": "^8.0",
         "timacdonald/log-fake": "^1.4"
     },
@@ -49,5 +55,7 @@
                 "DigitalRisks\\LaravelEventStore\\ServiceProvider"
             ]
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
