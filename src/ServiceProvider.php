@@ -2,6 +2,7 @@
 
 namespace DigitalRisks\LaravelEventStore;
 
+use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreReplay;
 use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreReset;
 use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreWorker;
 use DigitalRisks\LaravelEventStore\Console\Commands\EventStoreWorkerThread;
@@ -27,6 +28,7 @@ class ServiceProvider extends LaravelServiceProvider
                 EventStoreWorker::class,
                 EventStoreWorkerThread::class,
                 EventStoreReset::class,
+                EventStoreReplay::class,
             ]);
         }
 

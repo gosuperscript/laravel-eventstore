@@ -307,6 +307,16 @@ class QuoteStartedTest extends TestCase
 
 In addition you may set set `eventstore.connection` to `sync`, which will trick your listeners 
 
+## Usage - Replaying Events
+
+You can replay events by using the replay command
+
+````
+php artisan eventstore:replay <stream> <event>
+````
+
+`<event>` can be a single event number of a range like `390-396`
+
 ## Configuration
 
 The defaults are set in `config/eventstore.php`. Copy this file to your own config directory to modify the values:
