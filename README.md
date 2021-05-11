@@ -315,7 +315,7 @@ You can replay events by using the replay command
 php artisan eventstore:replay <stream> <event>
 ````
 
-`<event>` can be a single event number of a range like `390-396`
+`<event>` can be a single event number or a range like `390-396`
 
 ## Configuration
 

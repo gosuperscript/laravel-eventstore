@@ -3,25 +3,29 @@
 namespace DigitalRisks\LaravelEventStore\Console\Commands;
 
 use DigitalRisks\LaravelEventStore\Client;
-use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
-use DigitalRisks\LaravelEventStore\EventStore as LaravelEventStore;
+use DigitalRisks\LaravelEventStore\Services\EventStoreEventService;
+use DigitalRisks\LaravelEventStore\TestUtils\Traits\MakesEventRecords;
 use Illuminate\Console\Command;
-use ReflectionClass;
-use ReflectionProperty;
-use Illuminate\Support\Facades\Event;
-use Rxnet\EventStore\Data\EventRecord as EventData;
-use Rxnet\EventStore\Record\JsonEventRecord;
+use InvalidArgumentException;
+use Rxnet\EventStore\Record\EventRecord;
 
 class EventStoreReplay extends Command
 {
+    use MakesEventRecords;
+
     protected $signature = 'eventstore:replay {stream} {events}';
 
     protected $description = 'Replay a single or range of events';
-    protected $client;
 
-    public function __construct(Client $client)
+    private Client $client;
+
+    private EventStoreEventService $eventService;
+
+
+    public function __construct(Client $client, EventStoreEventService $eventService)
     {
         $this->client = $client;
+        $this->eventService = $eventService;
 
         parent::__construct();
     }
@@ -30,25 +34,40 @@ class EventStoreReplay extends Command
     {
         $stream = $this->argument('stream');
         $events = explode('-', $this->argument('events'));
+        if (!filter_var($events[0], FILTER_VALIDATE_INT)) {
+            throw new InvalidArgumentException('Events only accepts integer values');
+        }
 
         if (count($events) > 1) {
+            if (!filter_var($events[1], FILTER_VALIDATE_INT)) {
+                throw new InvalidArgumentException('Events only accepts integer values');
+            }
+            if ($events[1] <= $events[0]) {
+                throw new InvalidArgumentException('Events must be an upward range');
+            }
             $events = range($events[0], $events[1]);
         }
 
         $progressBar = $this->output->createProgressBar(count($events));
         $progressBar->start();
 
-        foreach ($events as $key => $event) {
+        foreach ($events as $event) {
             $response = $this->client->get("/streams/$stream/$event", [
                 'headers' => [
                     'Accept' => 'application/vnd.eventstore.atom+json'
                 ]
             ]);
-
-            $eventData = json_decode($response->getBody()->getContents(), true);
+            $eventData = json_decode($response->getBody()->getContents(), true)['content'];
+            $eventRecord = $this->makeEventRecord(
+                $eventData['eventType'],
+                $eventData['data'],
+                $eventData['metadata'],
+                null,
+                $eventData['eventStreamId']
+            );
 
             try {
-                $this->dispatch($eventData);
+                $this->dispatch($eventRecord);
                 $progressBar->advance();
             } catch (\Exception $e) {
                 $this->info("Error: " . $e->getMessage());
@@ -59,68 +78,9 @@ class EventStoreReplay extends Command
         $progressBar->finish();
     }
 
-    public function dispatch(array $eventData): void
+    public function dispatch(EventRecord $eventRecord): void
     {
-        $serializedEvent = $this->makeSerializableEvent($eventData);
-
-        $type = $serializedEvent->getType();
-        
-        if ($localEvent = $this->mapToLocalEvent($serializedEvent)) {
-            $event = $localEvent;
-            $payload = null;
-        } else {
-            $event = $type;
-            $payload = $serializedEvent;
-        }
-
-        event($event, $payload);
-    }
-
-    protected function mapToLocalEvent($event)
-    {
-        $eventToClass = LaravelEventStore::$eventToClass;
-        $className = $eventToClass ? $eventToClass($event) : 'App\Events\\' . $event->getType();
-
-        if (!class_exists($className)) {
-            return;
-        }
-
-        $reflection = new ReflectionClass($className);
-
-        if (!$reflection->implementsInterface(CouldBeReceived::class)) {
-            return;
-        }
-
-        $localEvent = new $className();
-        $props = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
-        $data = $event->getData();
-
-        foreach ($props as $prop) {
-            $key = $prop->getName();
-            $localEvent->$key = $data[$key] ?? null;
-        }
-
-        $localEvent->setEventRecord($event);
-
-        return $localEvent;
-    }
-
-    private function makeSerializableEvent(array $event): JsonEventRecord
-    {
-        $data = new EventData();
-        $data->setEventId($event['content']['eventId']);
-        $data->setEventType($event['content']['eventType']);
-        $data->setEventNumber($event['content']['eventNumber']);
-        $data->setData(json_encode($event['content']['data']));
-        $data->setEventStreamId($event['content']['eventStreamId']);
-        $data->setMetadata(json_encode($this->safeGetMetadata($event)));
-        $data->setCreatedEpoch(strtotime($event['updated']) * 1000);
-
-        return new JsonEventRecord($data);
-    }
-
-    private function safeGetMetadata(array $event)
-    {
-        return $event['content']['metadata'] === '' ? [] : $event['content']['metadata'];
+        $preparedEvent = $this->eventService->prepareEvent($eventRecord);
+        event($preparedEvent['event'], $preparedEvent['payload']);
     }
 }
