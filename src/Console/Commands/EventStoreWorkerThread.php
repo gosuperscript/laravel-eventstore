@@ -2,18 +2,13 @@
 
 namespace DigitalRisks\LaravelEventStore\Console\Commands;
 
-use DigitalRisks\LaravelEventStore\Contracts\CouldBeReceived;
 use DigitalRisks\LaravelEventStore\EventStore as LaravelEventStore;
+use DigitalRisks\LaravelEventStore\Services\EventStoreEventService;
 use EventLoop\EventLoop;
 use Illuminate\Console\Command;
-use ReflectionClass;
-use ReflectionProperty;
-use Rxnet\EventStore\Data\EventRecord as EventData;
 use Rxnet\EventStore\EventStore;
 use Rxnet\EventStore\Record\AcknowledgeableEventRecord;
 use Rxnet\EventStore\Record\EventRecord;
-use Rxnet\EventStore\Record\JsonEventRecord;
-use TypeError;
 use Illuminate\Support\Facades\Event;
 
 class EventStoreWorkerThread extends Command
@@ -24,12 +19,15 @@ class EventStoreWorkerThread extends Command
 
     protected $description = 'Worker handling incoming event streams from ES';
 
+    private EventStoreEventService $eventService;
+
     private $loop;
 
-    public function __construct()
+    public function __construct(EventStoreEventService $eventService)
     {
         parent::__construct();
 
+        $this->eventService = $eventService;
         $this->loop = EventLoop::getLoop();
     }
 
@@ -104,83 +102,17 @@ class EventStoreWorkerThread extends Command
             }, 'report');
     }
 
-    protected function safeGetMetadata(EventRecord $event)
-    {
-        try {
-            return $event->getMetadata() ?? [];
-        } catch (TypeError $e) {
-            return [];
-        }
-    }
-
     public function dispatch(EventRecord $eventRecord): void
     {
-        $serializedEvent = $this->makeSerializableEvent($eventRecord);
-
-        $type = $serializedEvent->getType();
-        $stream = $serializedEvent->getStreamId();
-        $number = $serializedEvent->getNumber();
-
-        if ($localEvent = $this->mapToLocalEvent($serializedEvent)) {
-            $event = $localEvent;
-            $payload = null;
-        } else {
-            $event = $type;
-            $payload = $serializedEvent;
-        }
+        $preparedEvent = $this->eventService->prepareEvent($eventRecord);
 
         $url = parse_url(config('eventstore.http_url'));
         $url = "{$url['scheme']}://{$url['host']}:{$url['port']}/web/index.html#";
 
+        $hasListener = Event::hasListeners($preparedEvent['type']);
+        $metadata = ['type' => $preparedEvent['type'], 'hasListeners' => $hasListener];
 
-        $hasListener = Event::hasListeners($type);
-        $metadata = ['type' => $type, 'hasListeners' => $hasListener];
-
-        (LaravelEventStore::$threadLogger)("{$url}/streams/{$stream}/{$number}", $metadata);
-        event($event, $payload);
-    }
-
-    private function makeSerializableEvent(EventRecord $event): JsonEventRecord
-    {
-        $data = new EventData();
-
-        $data->setEventId($event->getId());
-        $data->setEventType($event->getType());
-        $data->setEventNumber($event->getNumber());
-        $data->setData(json_encode($event->getData()));
-        $data->setEventStreamId($event->getStreamId());
-        $data->setMetadata(json_encode($this->safeGetMetadata($event)));
-        $data->setCreatedEpoch($event->getCreated()->getTimestamp() * 1000);
-
-        return new JsonEventRecord($data);
-    }
-
-    protected function mapToLocalEvent($event)
-    {
-        $eventToClass = LaravelEventStore::$eventToClass;
-        $className = $eventToClass ? $eventToClass($event) : 'App\Events\\' . $event->getType();
-
-        if (!class_exists($className)) {
-            return;
-        }
-
-        $reflection = new ReflectionClass($className);
-
-        if (!$reflection->implementsInterface(CouldBeReceived::class)) {
-            return;
-        }
-
-        $localEvent = new $className();
-        $props = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
-        $data = $event->getData();
-
-        foreach ($props as $prop) {
-            $key = $prop->getName();
-            $localEvent->$key = $data[$key] ?? null;
-        }
-
-        $localEvent->setEventRecord($event);
-
-        return $localEvent;
+        (LaravelEventStore::$threadLogger)("{$url}/streams/{$preparedEvent['stream']}/{$preparedEvent['number']}", $metadata);
+        event($preparedEvent['event'], $preparedEvent['payload']);
     }
 }
