@@ -3,6 +3,7 @@
 namespace DigitalRisks\LaravelEventStore\Console\Commands;
 
 use DigitalRisks\LaravelEventStore\EventStore as LaravelEventStore;
+use DigitalRisks\LaravelEventStore\Exceptions\ConnectionLostException;
 use DigitalRisks\LaravelEventStore\Services\EventStoreEventService;
 use EventLoop\EventLoop;
 use Illuminate\Console\Command;
@@ -46,7 +47,7 @@ class EventStoreWorkerThread extends Command
             report($e);
         }
 
-        report(new \Exception('Lost connection with EventStore - reconnecting'));
+        report(new ConnectionLostException());
         sleep(1);
 
         $this->handle();
