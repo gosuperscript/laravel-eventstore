@@ -1,5 +1,5 @@
 {
-    "name": "digitalrisks/laravel-eventstore",
+    "name": "gosuperscript/laravel-eventstore",
     "description": "All things regarding integrating Greg Young's Event Store into Laravel",
     "keywords": [
         "digitalrisks",
